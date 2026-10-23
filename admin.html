@@ -275,7 +275,7 @@ if (typeof FIREBASE_CONFIGURED === "undefined" || !FIREBASE_CONFIGURED){
 } else {
   try{
     app = initializeApp(firebaseConfig);
-    db = getFirestore(app); auth = getAuth(app); storage = getStorage(app);
+    db = getFirestore(app, "default"); auth = getAuth(app); storage = getStorage(app);
   }catch(e){ loginError("Could not start Firebase: " + e.message); }
 }
 if (auth){
