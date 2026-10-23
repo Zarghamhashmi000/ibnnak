@@ -326,7 +326,7 @@ async function loadData(){
   }
   try{
     const app = initializeApp(firebaseConfig);
-    db = getFirestore(app);
+    db = getFirestore(app, "default");
     const [cSnap, pSnap, sSnap] = await Promise.all([
       getDocs(query(collection(db,"categories"), orderBy("order"))),
       getDocs(query(collection(db,"products"), orderBy("createdAt","desc"))),
