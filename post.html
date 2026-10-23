@@ -160,7 +160,7 @@ function fmtDate(ts){
   }
   try{
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    const db = getFirestore(app, "default");
     const snap = await getDoc(doc(db, "posts", id));
     if (!snap.exists()){ showState("Article not found", "This article may have been moved or removed."); return; }
     const p = snap.data();
