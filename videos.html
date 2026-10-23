@@ -176,7 +176,7 @@ function ytId(url){
   }
   try{
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    const db = getFirestore(app, "default");
     const snap = await getDocs(query(collection(db, "videos"), orderBy("createdAt", "desc")));
     const videos = snap.docs.map(d => ({id: d.id, ...d.data()}));
     if (!videos.length){ state("Videos Coming Soon", "New talks are being added — please check back soon."); return; }
