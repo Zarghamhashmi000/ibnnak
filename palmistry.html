@@ -219,7 +219,7 @@ document.getElementById("palmIntro").textContent = DEFAULT_INTRO;
   }
   try{
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    const db = getFirestore(app, "default");
     const [cSnap, pSnap, sSnap, bSnap] = await Promise.all([
       getDocs(query(collection(db, "categories"), orderBy("order"))),
       getDocs(query(collection(db, "products"), orderBy("createdAt", "desc"))),
