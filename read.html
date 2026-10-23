@@ -223,14 +223,6 @@ function renderPageViewer(p, pages){
     const p = { id: snap.id, ...snap.data() };
     document.title = (p.name || "Book") + " — Read Online — Ibnnak";
     document.getElementById("readerTitle").textContent = p.name || "Read Online";
-    if (p.readUrl){
-      root.innerHTML = `
-        <div class="viewer">
-          <iframe src="${esc(p.readUrl)}" title="${esc(p.name)}" loading="lazy"></iframe>
-        </div>
-        <p class="open-link">The viewer is not loading? <a href="${esc(p.readUrl)}" target="_blank" rel="noopener">Open this book in a new tab</a></p>`;
-      return;
-    }
     const pages = (p.images && p.images.length ? p.images : (p.imageUrl ? [p.imageUrl] : []));
     if (!pages.length){
       showState("Not available to read online yet", "This book does not have readable pages yet — please check back soon.", id);
