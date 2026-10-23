@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book — Ibnnak</title>
+<meta name="description" content="Ibnnak — a free online library. Read this book online, free.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f6f0e2; --card:#fffdf7; --ink:#232a22; --muted:#7d7466;
+    --brand:#1f5138; --brand-dark:#143c29; --gold:#b97e1e; --gold-soft:#f0e3c0;
+    --line:#e3d7bd;
+    --shadow:0 10px 30px rgba(31,60,40,.10); --radius:14px;
+    --header-bg:rgba(246,240,226,.94);
+  }
+  [data-theme="dark"]{
+    --bg:#10160f; --card:#1a211a; --ink:#ede6d4; --muted:#a99e86;
+    --brand:#6faf8b; --brand-dark:#589a76; --gold:#d9a94a; --gold-soft:#2e2a14;
+    --line:#2e362c;
+    --shadow:0 10px 30px rgba(0,0,0,.45);
+    --header-bg:rgba(16,22,15,.94);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--ink);line-height:1.65}
+  h1,h2,.serif{font-family:'Fraunces',Georgia,'Times New Roman',serif}
+  img{display:block;max-width:100%}
+  a{color:inherit}
+  .wrap{max-width:760px;margin:0 auto;padding:0 20px}
+  .wrap-wide{max-width:1160px;margin:0 auto;padding:0 20px}
+  header{position:sticky;top:0;z-index:50;background:var(--header-bg);
+    backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .nav{display:flex;align-items:center;justify-content:space-between;height:68px;gap:16px}
+  .brand{font-family:'Fraunces',Georgia,serif;font-size:1.45rem;font-weight:700;
+    color:var(--brand);text-decoration:none;letter-spacing:.02em;flex:none}
+  .brand small{display:block;font-family:'Inter',sans-serif;font-size:.62rem;font-weight:500;
+    letter-spacing:.32em;color:var(--muted);text-transform:uppercase}
+  .nav-links{display:flex;gap:20px}
+  .nav-links a{text-decoration:none;font-size:.9rem;font-weight:500;color:var(--ink);opacity:.8;white-space:nowrap}
+  .nav-links a:hover{opacity:1;color:var(--brand)}
+  .nav-links a.here{opacity:1;color:var(--brand);font-weight:600}
+  @media(max-width:900px){.nav-links{display:none}}
+  .theme-btn{background:transparent;border:1.5px solid var(--line);color:var(--ink);
+    width:42px;height:42px;border-radius:999px;cursor:pointer;display:inline-flex;
+    align-items:center;justify-content:center;flex:none}
+  .theme-btn:hover{border-color:var(--brand);color:var(--brand)}
+  main{padding:56px 0 72px}
+  .back{display:inline-block;text-decoration:none;color:var(--brand);font-weight:600;
+    font-size:.9rem;margin-bottom:26px}
+  .back:hover{text-decoration:underline}
+  .state{background:var(--card);border:1.5px dashed var(--line);border-radius:var(--radius);
+    padding:56px 24px;text-align:center;color:var(--muted)}
+  .state h2{color:var(--brand);font-size:1.5rem;margin-bottom:8px}
+  .state a{color:var(--brand);font-weight:600}
+  .book-layout{display:grid;grid-template-columns:minmax(280px,420px) 1fr;gap:36px;align-items:start}
+  @media(max-width:760px){.book-layout{grid-template-columns:1fr}}
+  .gal-wrap{position:relative;background:#eee2c4;border-radius:var(--radius);overflow:hidden;
+    min-height:320px;aspect-ratio:3/4;box-shadow:var(--shadow)}
+  [data-theme="dark"] .gal-wrap{background:#1c241b}
+  .gal{position:absolute;inset:0}
+  .gal-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;height:100%;
+    scrollbar-width:none;-ms-overflow-style:none}
+  .gal-track::-webkit-scrollbar{display:none}
+  .gal-slide{min-width:100%;height:100%;scroll-snap-align:center;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(420px 320px at 50% 42%,#f8f1de,#e6d6ae)}
+  [data-theme="dark"] .gal-slide{background:radial-gradient(420px 320px at 50% 42%,#2a3322,#1b211a)}
+  .gal-slide img{width:100%;height:100%;object-fit:contain;user-select:none;-webkit-user-drag:none}
+  .gal-btn{position:absolute;top:50%;transform:translateY(-50%);width:38px;height:38px;border-radius:50%;
+    border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;font-size:1.35rem;line-height:1;
+    display:flex;align-items:center;justify-content:center;z-index:2;box-shadow:var(--shadow)}
+  .gal-prev{left:10px}
+  .gal-next{right:10px}
+  .gal-dots{position:absolute;bottom:12px;left:0;right:0;display:flex;gap:7px;justify-content:center;z-index:2}
+  .gal-dots span{width:8px;height:8px;border-radius:50%;background:rgba(130,120,110,.5);cursor:pointer;
+    transition:transform .2s,background .2s}
+  .gal-dots span.on{background:var(--brand);transform:scale(1.3)}
+  .gal-ph{display:flex;align-items:center;justify-content:center;height:100%;min-height:320px;
+    color:#8a7340;font-family:'Fraunces',Georgia,serif;font-size:1.3rem}
+  .book-info .cat{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:600}
+  .book-info h1{font-size:clamp(1.9rem,5vw,2.6rem);line-height:1.2;color:var(--brand);margin:8px 0 10px;overflow-wrap:break-word}
+  .book-author{font-size:1rem;color:var(--muted);font-style:italic}
+  .book-pages{margin-top:10px;color:var(--muted);font-size:.92rem;font-weight:600}
+  .book-desc{color:var(--muted);font-size:.98rem;margin:18px 0 24px;white-space:pre-line}
+  .btn{display:inline-block;border:0;cursor:pointer;text-decoration:none;font-weight:600;
+    border-radius:999px;padding:14px 32px;font-size:.95rem;transition:transform .12s ease,box-shadow .12s ease}
+  .btn:active{transform:scale(.97)}
+  .btn-brand{background:var(--brand);color:#fff;box-shadow:var(--shadow)}
+  .btn-brand:hover{background:var(--brand-dark)}
+  .btn-outline{background:transparent;color:var(--brand);border:1.5px solid var(--brand)}
+  .btn-outline:hover{background:var(--brand);color:#fff}
+  .book-actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:6px}
+  .save-btn{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1.5px solid var(--line);
+    color:var(--ink);border-radius:999px;padding:12px 24px;font-weight:600;font-size:.95rem;cursor:pointer;font-family:inherit}
+  .save-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2}
+  .save-btn.on{color:#e0245e;border-color:#e0245e}
+  .save-btn.on svg{fill:#e0245e;stroke:#e0245e}
+  footer{background:#16241b;color:#b3ab96;text-align:center;padding:34px 20px;font-size:.88rem}
+  footer .brand{color:#ecdfba;font-size:1.2rem}
+  footer nav{margin:14px 0;display:flex;gap:20px;justify-content:center;flex-wrap:wrap}
+  footer nav a{color:#b3ab96;text-decoration:none}
+  footer nav a:hover{color:#fff}
+  button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+  @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap-wide nav">
+    <a class="brand" href="index.html">Ibnnak<small>Library</small></a>
+    <nav class="nav-links">
+      <a href="index.html">Home Page</a>
+      <a href="books.html" class="here">Books</a>
+      <a href="articles.html">Articles</a>
+      <a href="quotations.html">Quotations</a>
+      <a href="videos.html">Videos</a>
+      <a href="palmistry.html">Palmistry</a>
+    </nav>
+    <button class="theme-btn" id="themeToggle" aria-label="Switch to dark mode"></button>
+  </div>
+</header>
+
+<main>
+  <div class="wrap-wide">
+    <a class="back" href="books.html">← All books</a>
+    <div id="bookRoot">
+      <div class="state"><h2>Loading…</h2><p>Fetching this book.</p></div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap-wide">
+    <div class="brand serif">Ibnnak</div>
+    <nav>
+      <a href="index.html">Home Page</a><a href="books.html">Books</a><a href="articles.html">Articles</a>
+      <a href="quotations.html">Quotations</a><a href="videos.html">Videos</a><a href="palmistry.html">Palmistry</a>
+    </nav>
+    <div>© <span id="yr"></span> Ibnnak. All rights reserved.</div>
+  </div>
+</footer>
+
+<script src="firebase-config.js"></script>
+<script>
+(function(){
+  var MOON = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+  var SUN = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+  var btn = document.getElementById("themeToggle");
+  function apply(t){
+    document.documentElement.dataset.theme = t;
+    try{ localStorage.setItem("abk_theme", t); }catch(e){}
+    btn.innerHTML = t === "dark" ? SUN : MOON;
+    btn.setAttribute("aria-label", t === "dark" ? "Switch to light mode" : "Switch to dark mode");
+  }
+  var saved = "light";
+  try{ saved = localStorage.getItem("abk_theme") || "light"; }catch(e){}
+  apply(saved);
+  btn.addEventListener("click", function(){
+    apply(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+  });
+  document.getElementById("yr").textContent = new Date().getFullYear();
+})();
+</script>
+<script type="importmap">
+{"imports":{
+  "firebase/app":"https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js",
+  "firebase/firestore":"https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js"
+}}
+</script>
+<script type="module">
+import { initializeApp } from "firebase/app";
+import { getFirestore, collection, getDocs, getDoc, doc, query, orderBy } from "firebase/firestore";
+
+const root = document.getElementById("bookRoot");
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const HEART_SVG = '<svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>';
+let wish = [];
+try { wish = JSON.parse(localStorage.getItem("abk_wish") || "[]"); } catch(e){ wish = []; }
+function saveWish(){ try{ localStorage.setItem("abk_wish", JSON.stringify(wish)); }catch(e){} }
+
+function showState(title, text){
+  root.innerHTML = `<div class="state"><h2>${esc(title)}</h2><p>${esc(text)}</p><p style="margin-top:14px"><a href="books.html">← Back to the Books page</a></p></div>`;
+}
+
+function renderGallery(p, imgs){
+  if (!imgs.length) return `<div class="gal-wrap"><div class="gal-ph">Ibnnak</div></div>`;
+  const multi = imgs.length > 1;
+  return `<div class="gal-wrap"><div class="gal">
+    <div class="gal-track" id="galTrack">${imgs.map((u,i)=>
+      `<div class="gal-slide"><img src="${esc(u)}" alt="${esc(p.name)}${multi?` — photo ${i+1}`:""}"${i>0?' loading="lazy"':""} decoding="async" draggable="false"></div>`
+    ).join("")}</div>
+    ${multi ? `<button class="gal-btn gal-prev" id="galPrev" aria-label="Previous photo">‹</button>
+    <button class="gal-btn gal-next" id="galNext" aria-label="Next photo">›</button>
+    <div class="gal-dots" id="galDots">${imgs.map((_,i)=>`<span data-d="${i}" class="${i===0?"on":""}"></span>`).join("")}</div>` : ""}
+  </div></div>`;
+}
+function wireGallery(count){
+  if (count < 2) return;
+  const track = document.getElementById("galTrack");
+  if (!track) return;
+  let slide = 0;
+  const go = i => {
+    slide = (i + count) % count;
+    track.scrollTo({ left: slide * track.clientWidth, behavior: "smooth" });
+  };
+  document.getElementById("galPrev").onclick = () => go(slide - 1);
+  document.getElementById("galNext").onclick = () => go(slide + 1);
+  document.querySelectorAll("#galDots span").forEach(s => s.onclick = () => go(+s.dataset.d));
+  let t;
+  track.onscroll = () => {
+    clearTimeout(t);
+    t = setTimeout(() => {
+      slide = Math.round(track.scrollLeft / track.clientWidth);
+      document.querySelectorAll("#galDots span").forEach((s,i) => s.classList.toggle("on", i === slide));
+    }, 90);
+  };
+}
+
+(async function(){
+  const id = new URLSearchParams(location.search).get("id");
+  if (!id){ showState("No book selected", "This link is missing its book. Head back to the Books page to browse the shelves."); return; }
+  if (typeof FIREBASE_CONFIGURED === "undefined" || !FIREBASE_CONFIGURED){
+    showState("Book not available yet", "The library is still being set up — please check back soon.");
+    return;
+  }
+  try{
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const [snap, cSnap] = await Promise.all([
+      getDoc(doc(db, "products", id)),
+      getDocs(query(collection(db, "categories"), orderBy("order"))).catch(() => null)
+    ]);
+    if (!snap.exists()){ showState("Book not found", "This book may have been moved or removed. Head back to the Books page to browse the shelves."); return; }
+    const p = { id: snap.id, ...snap.data() };
+    document.title = (p.name || "Book") + " — Ibnnak";
+    const cats = cSnap ? cSnap.docs.map(d => ({id:d.id, ...d.data()})) : [];
+    const catById = Object.fromEntries(cats.map(c => [c.id, c]));
+    const c = catById[p.categoryId];
+    let catText = "Books";
+    if (c){
+      catText = (c.parentId && catById[c.parentId]) ? catById[c.parentId].name + " · " + c.name : c.name;
+    }
+    const imgs = (p.images && p.images.length ? p.images : (p.imageUrl ? [p.imageUrl] : []));
+    const pageLine = p.pageCount ? `<div class="book-pages">${esc(p.pageCount)} pages</div>` : "";
+    root.innerHTML = `
+      <div class="book-layout">
+        ${renderGallery(p, imgs)}
+        <div class="book-info">
+          <div class="cat">${esc(catText)}</div>
+          <h1>${esc(p.name || "")}</h1>
+          ${p.author ? `<div class="book-author">by ${esc(p.author)}</div>` : ""}
+          ${pageLine}
+          ${p.description ? `<div class="book-desc">${esc(p.description)}</div>` : ""}
+          <div class="book-actions">
+            <a class="btn btn-brand" href="read.html?id=${encodeURIComponent(p.id)}">Read Online</a>
+            <a class="btn btn-outline" href="download.html?id=${encodeURIComponent(p.id)}">Download</a>
+            <button class="save-btn" id="saveBtn" aria-label="Saved">${HEART_SVG}<span>Save</span></button>
+          </div>
+        </div>
+      </div>`;
+    wireGallery(imgs.length);
+    const saveBtn = document.getElementById("saveBtn");
+    function paintSave(){
+      const on = wish.includes(p.id);
+      saveBtn.classList.toggle("on", on);
+      saveBtn.querySelector("span").textContent = on ? "Saved" : "Save";
+    }
+    paintSave();
+    saveBtn.onclick = () => {
+      wish = wish.includes(p.id) ? wish.filter(x => x !== p.id) : [...wish, p.id];
+      saveWish(); paintSave();
+    };
+  }catch(e){
+    console.warn("[Ibnnak] Could not load book:", e.message);
+    showState("Could not load this book", "Please check your connection and try again.");
+  }
+})();
+</script>
+</body>
+</html>
