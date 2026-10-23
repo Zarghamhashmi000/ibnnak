@@ -217,7 +217,7 @@ function renderPageViewer(p, pages){
   }
   try{
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    const db = getFirestore(app, "default");
     const snap = await getDoc(doc(db, "products", id));
     if (!snap.exists()){ showState("Book not found", "This book may have been moved or removed.", id); return; }
     const p = { id: snap.id, ...snap.data() };
