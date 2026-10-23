@@ -137,8 +137,7 @@
           <div class="field"><label>Book title *</label><input id="pfName" placeholder="e.g. The Sealed Nectar (Ar-Raheeq Al-Makhtum)"></div>
           <div class="field"><label>Author</label><input id="pfAuthor" placeholder="e.g. Safiur Rahman Mubarakpuri"></div>
           <div class="field"><label>Category *</label><select id="pfCategory"></select></div>
-          <div class="field"><label>Read URL (optional)</label><input id="pfReadUrl" placeholder="https://… (external PDF / reader link — used instead of page photos when set)"></div>
-          <div class="field"><label>Download File URL</label><input id="pfDownloadUrl" placeholder="https://… (file visitors get after paying on the download page)"></div>
+          <div class="field"><label>Download File URL (file lives on this site)</label><input id="pfDownloadUrl" placeholder="books/my-book.pdf"><small>Reading is always from the page photos you upload here — never an outside link. For downloads, send the book file to Muse: it is placed inside this site and this box is filled for you.</small></div>
           <div class="field"><label>Download Price</label><input id="pfDownloadPrice" type="number" min="0" placeholder="e.g. 500"></div>
           <div class="field"><label>Pages (optional)</label><input id="pfPageCount" type="number" min="0" placeholder="e.g. 320"></div>
           <div class="field"><label>Cover &amp; Page Photos <small style="font-weight:400;color:#7d7466">(cover first, then the book's readable pages in order — you can select more than one)</small></label><input id="pfImage" type="file" accept="image/*" multiple><div class="thumbs" id="pfThumbs"></div></div>
@@ -405,7 +404,7 @@ function renderPfThumbs(){
 function resetProductForm(){
   $("pfId").value=""; $("pfName").value=""; $("pfAuthor").value=""; $("pfDesc").value="";
   $("pfImage").value=""; $("pfOk").style.display="none";
-  $("pfReadUrl").value=""; $("pfDownloadUrl").value=""; $("pfDownloadPrice").value=""; $("pfPageCount").value="";
+  $("pfDownloadUrl").value=""; $("pfDownloadPrice").value=""; $("pfPageCount").value="";
   pfKept=[]; pfNewFiles=[]; renderPfThumbs();
   $("pfTitle").textContent="Add Book"; fillCatSelect($("pfCategory"));
 }
@@ -422,7 +421,6 @@ function editProduct(id){
   $("pfTitle").textContent="Edit Book"; $("pfId").value=id;
   $("pfName").value=p.name||""; $("pfAuthor").value=p.author||""; $("pfDesc").value=p.description||"";
   $("pfCategory").value=p.categoryId||"";
-  $("pfReadUrl").value=p.readUrl||"";
   $("pfDownloadUrl").value=p.downloadUrl||"";
   $("pfDownloadPrice").value=(p.downloadPrice!=null?p.downloadPrice:"");
   $("pfPageCount").value=(p.pageCount!=null?p.pageCount:"");
@@ -450,7 +448,7 @@ $("pfSave").onclick = async ()=>{
     const pcRaw = $("pfPageCount").value.trim();
     const pageCount = pcRaw === "" ? null : Number(pcRaw);
     const data={name, author:$("pfAuthor").value.trim(), categoryId:cat, description:$("pfDesc").value.trim(),
-      images, imageUrl, readUrl:$("pfReadUrl").value.trim(), downloadUrl:$("pfDownloadUrl").value.trim(),
+      images, imageUrl, downloadUrl:$("pfDownloadUrl").value.trim(),
       downloadPrice, pageCount, createdAt: old?.createdAt || serverTimestamp()};
     if(id) await updateDoc(doc(db,"products",id), data);
     else await addDoc(collection(db,"products"), data);
