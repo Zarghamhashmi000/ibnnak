@@ -173,7 +173,7 @@ function postDate(p){
   }
   try{
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    const db = getFirestore(app, "default");
     const snap = await getDocs(query(collection(db, "posts"), orderBy("createdAt", "desc")));
     const posts = snap.docs.map(d => ({id: d.id, ...d.data()}));
     if (!posts.length){ state("Articles Coming Soon", "Reading notes and new arrivals will appear here."); return; }
