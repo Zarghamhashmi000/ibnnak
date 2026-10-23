@@ -162,7 +162,7 @@ function state(title, text){
   }
   try{
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    const db = getFirestore(app, "default");
     const snap = await getDocs(query(collection(db, "quotations"), orderBy("createdAt", "desc")));
     const quotes = snap.docs.map(d => ({id: d.id, ...d.data()}));
     if (!quotes.length){ state("Quotations Coming Soon", "New quotations are being gathered — please check back soon."); return; }
