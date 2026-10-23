@@ -227,7 +227,7 @@ function wireGallery(count){
   }
   try{
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    const db = getFirestore(app, "default");
     const [snap, cSnap] = await Promise.all([
       getDoc(doc(db, "products", id)),
       getDocs(query(collection(db, "categories"), orderBy("order"))).catch(() => null)
