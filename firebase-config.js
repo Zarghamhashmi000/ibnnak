@@ -13,12 +13,12 @@
 // ============================================================================
 
 const firebaseConfig = {
-  apiKey: "PASTE_YOUR_API_KEY",
-  authDomain: "PASTE_YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "PASTE_YOUR_PROJECT_ID",
-  storageBucket: "PASTE_YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "PASTE_YOUR_SENDER_ID",
-  appId: "PASTE_YOUR_APP_ID"
+  apiKey: "AIzaSyBJHfpn0pJN8WQx-PRLuk32JeKM16twi30",
+  authDomain: "ibnnak-91972.firebaseapp.com",
+  projectId: "ibnnak-91972",
+  storageBucket: "ibnnak-91972.firebasestorage.app",
+  messagingSenderId: "335401374622",
+  appId: "1:335401374622:web:3a5e951caa0b378f6bbc8f"
 };
 
 // True only when the owner has pasted real values above.
