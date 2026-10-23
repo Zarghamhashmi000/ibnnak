@@ -73,6 +73,9 @@
   .btn-brand{background:var(--brand);color:#fff;box-shadow:var(--shadow)}
   .btn-brand:hover{background:var(--brand-dark)}
   .btn-brand[disabled]{opacity:.45;cursor:default;box-shadow:none;pointer-events:none}
+  .btn-dl{display:block;text-align:center;background:var(--brand);color:#fff;box-shadow:var(--shadow);
+    font-size:1.05rem;padding:16px 32px}
+  .btn-dl:hover{background:var(--brand-dark)}
   .btn-outline{background:transparent;color:var(--brand);border:1.5px solid var(--brand)}
   .btn-outline:hover{background:var(--brand);color:#fff}
   .note{font-size:.88rem;color:var(--muted);margin-top:16px}
@@ -190,11 +193,7 @@ function showState(title, text){
     /* Step 1 — payment (skipped visually when the download is free) */
     let step1 = "";
     if (isFree){
-      step1 = `
-      <div class="step-box">
-        <h2>Step 1 — No payment needed</h2>
-        <p>This download is free. You can skip straight to Step 2 below.</p>
-      </div>`;
+      step1 = "";
     } else if (paymentLink){
       step1 = `
       <div class="step-box">
@@ -218,15 +217,20 @@ function showState(title, text){
       </div>`;
     }
 
-    /* Step 2 — the file link lives only on this page */
-    const step2 = downloadUrl ? `
+    /* The file link lives only on this page — one big button, one tap */
+    const step2 = !downloadUrl ? `
       <div class="step-box">
-        <h2>Step 2 — Get your file</h2>
-        <p>Already paid? → <a class="btn btn-outline" href="${esc(downloadUrl)}" target="_blank" rel="noopener">Download your book</a></p>
+        <h2>Get your file</h2>
+        <p>The download file for this book is not available yet.</p>
+      </div>` : isFree ? `
+      <div class="step-box" style="border-top:0;margin-top:4px;padding-top:4px">
+        <a class="btn btn-dl" href="${esc(downloadUrl)}" target="_blank" rel="noopener">Download this book (PDF)</a>
+        <p class="note" style="text-align:center">One tap — the book opens straight away, ready to read or save. No detours, no extra pages.</p>
       </div>` : `
       <div class="step-box">
         <h2>Step 2 — Get your file</h2>
-        <p>The download file for this book is not available yet.</p>
+        <a class="btn btn-dl" href="${esc(downloadUrl)}" target="_blank" rel="noopener">Download your book (PDF)</a>
+        <p class="note">Paid in Step 1? One tap and the book opens straight away, ready to save.</p>
       </div>`;
 
     root.innerHTML = `
@@ -242,7 +246,7 @@ function showState(title, text){
         <p style="color:var(--muted)">Reading this book online is always free on Ibnnak. This page is only for getting your own copy of the file.</p>
         ${step1}
         ${step2}
-        <p class="note">Note: after payment, your file is delivered via the download link in Step 2 on this page — keep this page open, or return to it from the book's page once you have paid.</p>
+        <p class="note">This page is the only place this file lives — bookmark it if you want to grab the book again later.</p>
       </div>`;
 
     const revealBtn = document.getElementById("payReveal");
