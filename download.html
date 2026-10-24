@@ -188,7 +188,18 @@ function showState(title, text){
     const thumb = (p.images && p.images.length ? p.images[0] : (p.imageUrl || ""));
     const downloadPrice = (p.downloadPrice != null && Number(p.downloadPrice) > 0) ? Number(p.downloadPrice) : 0;
     const isFree = !downloadPrice;
-    const downloadUrl = p.downloadUrl || "";
+    let downloadUrl = p.downloadUrl || "";
+    let localParts = null;
+    /* Prefer the copy hosted inside Ibnnak over any outside link */
+    try{
+      const localMap = await (await fetch("books-data.json", {cache:"no-store"})).json();
+      const local = localMap && localMap[p.id];
+      if (local && local.file) downloadUrl = local.file;
+      if (local && local.parts && local.parts.length > 1) localParts = local.parts;
+    }catch(e){ /* keep the stored link */ }
+    const fileUrls = localParts ? localParts : (downloadUrl ? [downloadUrl] : []);
+    const dlLabel = i => localParts ? "Download Part " + (i + 1) + " (PDF)" : (isFree ? "Download this book (PDF)" : "Download your book (PDF)");
+    const dlButtons = fileUrls.map((u, i) => `<a class="btn btn-dl" href="${esc(u)}" target="_blank" rel="noopener"${i ? ' style="margin-top:10px"' : ''}>${dlLabel(i)}</a>`).join("");
 
     /* Step 1 — payment (skipped visually when the download is free) */
     let step1 = "";
@@ -218,18 +229,18 @@ function showState(title, text){
     }
 
     /* The file link lives only on this page — one big button, one tap */
-    const step2 = !downloadUrl ? `
+    const step2 = !fileUrls.length ? `
       <div class="step-box">
         <h2>Get your file</h2>
         <p>The download file for this book is not available yet.</p>
       </div>` : isFree ? `
       <div class="step-box" style="border-top:0;margin-top:4px;padding-top:4px">
-        <a class="btn btn-dl" href="${esc(downloadUrl)}" target="_blank" rel="noopener">Download this book (PDF)</a>
+        ${dlButtons}
         <p class="note" style="text-align:center">One tap — the book opens straight away, ready to read or save. No detours, no extra pages.</p>
       </div>` : `
       <div class="step-box">
         <h2>Step 2 — Get your file</h2>
-        <a class="btn btn-dl" href="${esc(downloadUrl)}" target="_blank" rel="noopener">Download your book (PDF)</a>
+        ${dlButtons}
         <p class="note">Paid in Step 1? One tap and the book opens straight away, ready to save.</p>
       </div>`;
 
