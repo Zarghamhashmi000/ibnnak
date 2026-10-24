@@ -74,6 +74,9 @@
   .btn-outline:hover{background:var(--brand);color:#fff}
   .open-link{text-align:center;margin-top:14px;font-size:.9rem;color:var(--muted)}
   .open-link a{color:var(--brand);font-weight:600}
+  .part-nav{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
+  .part-nav .btn{padding:9px 20px;font-size:.85rem}
+  .part-nav .btn.on{background:var(--brand);color:#fff}
   footer{background:#16241b;color:#b3ab96;text-align:center;padding:34px 20px;font-size:.88rem}
   footer .brand{color:#ecdfba;font-size:1.2rem}
   footer nav{margin:14px 0;display:flex;gap:20px;justify-content:center;flex-wrap:wrap}
@@ -223,6 +226,35 @@ function renderPageViewer(p, pages){
     const p = { id: snap.id, ...snap.data() };
     document.title = (p.name || "Book") + " — Read Online — Ibnnak";
     document.getElementById("readerTitle").textContent = p.name || "Read Online";
+    /* Books hosted inside Ibnnak: read the site's own file — nothing is fetched from outside */
+    try{
+      const localMap = await (await fetch("books-data.json", {cache:"no-store"})).json();
+      const local = localMap && localMap[p.id];
+      if (local && local.file){
+        const parts = (local.parts && local.parts.length > 1) ? local.parts : null;
+        const partNav = parts ? `<div class="part-nav" id="partNav">${parts.map((f, i) => `<button class="btn btn-outline${i === 0 ? " on" : ""}" data-part="${i}">Part ${i + 1}</button>`).join("")}</div>` : "";
+        root.innerHTML = `
+          ${partNav}
+          <div class="viewer">
+            <iframe id="bookFrame" src="${esc(local.file)}" title="${esc(p.name)}" loading="lazy"></iframe>
+          </div>
+          <p class="open-link">This book lives on Ibnnak. Trouble viewing? <a id="directLink" href="${esc(local.file)}" target="_blank" rel="noopener">Open the book file directly</a>.</p>`;
+        if (parts){
+          const frame = document.getElementById("bookFrame");
+          const direct = document.getElementById("directLink");
+          document.getElementById("partNav").addEventListener("click", e => {
+            const b = e.target.closest("[data-part]");
+            if (!b) return;
+            const f = parts[Number(b.dataset.part)];
+            frame.src = f;
+            direct.href = f;
+            document.querySelectorAll("#partNav .btn").forEach(x => x.classList.remove("on"));
+            b.classList.add("on");
+          });
+        }
+        return;
+      }
+    }catch(e){ /* no local copy — fall through to the page photos */ }
     const pages = (p.images && p.images.length ? p.images : (p.imageUrl ? [p.imageUrl] : []));
     if (!pages.length){
       showState("Not available to read online yet", "This book does not have readable pages yet — please check back soon.", id);
