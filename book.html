@@ -124,7 +124,7 @@
     <button class="theme-btn" id="themeToggle" aria-label="Switch to dark mode"></button>
   </div>
 </header>
-<nav class="lib-nav"><div class="wrap"><a href="index.html">Home Page</a><a href="books.html" class="active">Books</a><a href="articles.html">Articles</a><a href="quotations.html">Quotations</a><a href="videos.html">Videos</a><a href="palmistry.html">Palmistry</a></div></nav>
+<nav class="lib-nav"><div class="wrap"><a href="index.html">Home Page</a><a href="books.html" class="active">Books</a><a href="articles.html">Articles</a><a href="quotations.html">Quotations</a><a href="videos.html">Videos</a><a href="palmistry.html">Palmistry</a><a href="submit.html">Submit</a></div></nav>
 
 
 <main>
@@ -254,7 +254,7 @@ function wireGallery(count){
         <div class="book-info">
           <div class="cat">${esc(catText)}</div>
           <h1>${esc(p.name || "")}</h1>
-          ${p.author ? `<div class="book-author">by ${esc(p.author)}</div>` : ""}
+          ${p.author ? `<div class="book-author">by <a href="author.html?author=${encodeURIComponent(p.author)}">${esc(p.author)}</a></div>` : ""}
           ${pageLine}
           ${p.description ? `<div class="book-desc">${esc(p.description)}</div>` : ""}
           <div class="book-actions">
