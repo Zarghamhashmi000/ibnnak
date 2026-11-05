@@ -64,3 +64,42 @@ footer{background:#16294b !important;color:#dbe4f0 !important;text-align:left !i
 [data-theme="dark"] .drawer{background:var(--card);color:var(--ink)}
 [data-theme="dark"] .card .ph,[data-theme="dark"] .rand .thumb{background:#24423a;color:#7ed4a8}
 [data-theme="dark"] .lib-footer-grid a{color:#dbe4f0}
+
+
+/* --- Responsive audit fix: phones, small phones, tablets --- */
+html,body{overflow-x:clip}
+h1{font-size:clamp(1.5rem,5vw,2.2rem);overflow-wrap:break-word}
+h2{overflow-wrap:break-word}
+.search{min-width:0}.search input{min-width:0}
+.card-body h3,.shelf-head h2,.banner h1{overflow-wrap:break-word}
+img,iframe{max-width:100%}
+input,select,textarea{font-size:16px}
+@media(max-width:700px){
+.topbar .wrap{gap:.5rem}.nav a{padding:.6rem .8rem;font-size:.9rem}
+.banner{padding:1.2rem;margin:1rem auto}.shelf{padding:1rem}.card-body{padding:.7rem}.card-body h3{font-size:.88rem}
+.toolbar{flex-direction:column;align-items:stretch}.filter{padding:.9rem}.form{padding:1rem}.submit{text-align:center}
+.header .wrap{gap:1rem}
+}
+@media(max-width:480px){
+.wrap{padding:0 .75rem 1.5rem}.header .wrap{padding:.8rem .75rem}.logo{font-size:1.4rem}
+.search input,.search button{padding:.6rem .7rem;font-size:.9rem}.submit{padding:.6rem .9rem;font-size:.9rem}
+.nav a{padding:.55rem .65rem;font-size:.85rem}.banner{padding:1.2rem .9rem;border-radius:10px}.banner h1{font-size:1.4rem}
+.grid{grid-template-columns:repeat(2,1fr) !important;gap:.7rem}
+.card-body{padding:.6rem}.card-body h3{font-size:.82rem;line-height:1.35}.card-body p{font-size:.78rem}
+.shelf,.form,.about,.filter,.aside,.directory{padding:.9rem}
+.directory-grid,.footer .wrap,.post-grid{grid-template-columns:1fr !important}
+.archive-layout,.layout{gap:1rem}.pagination a{padding:.35rem .65rem;font-size:.85rem}
+.rand .thumb,.rand img{width:42px;height:60px}.topbar{font-size:.8rem}.drawer{width:94vw}
+}
+
+.wrap,.wrap-wide{padding-left:14px !important;padding-right:14px !important}
+.v-grid{grid-template-columns:repeat(auto-fill,minmax(min(280px,100%),1fr)) !important}
+.viewer iframe{height:70vh}.viewer img{max-height:65vh}
+.lib-nav a{white-space:nowrap}
+@media(max-width:480px){
+.lib-nav a{padding:.55rem .65rem;font-size:.85rem}
+.lib-footer-grid{grid-template-columns:1fr !important}
+.wrap.nav{padding:.8rem 14px !important;gap:1rem !important}
+.search{flex:1 1 200px !important}.submit{text-align:center}
+table{display:block;overflow-x:auto;max-width:100%}
+}
