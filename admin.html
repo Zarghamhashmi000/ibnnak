@@ -122,6 +122,7 @@
     <button class="tab" data-tab="blog">Blog</button>
     <button class="tab" data-tab="quotations">Quotations</button>
     <button class="tab" data-tab="videos">Videos</button>
+    <button class="tab" data-tab="submissions">Submissions</button>
   </div></div>
 
   <main><div class="wrap">
@@ -240,6 +241,15 @@
       <div id="videoList"></div>
     </div>
 
+
+    <!-- SUBMISSIONS -->
+    <div class="pane" id="pane-submissions">
+      <div class="pane-head"><h2>Submissions — approval</h2></div>
+      <p class="muted" style="margin-bottom:14px">Public submissions from submit.html arrive here as <b>Under review</b> and are <b>not</b> published until you approve them. Approve creates the book/article in its chosen category (creating a suggested category first if needed) and links it to the author's landing page. Reject stores your message — the submitter sees it on submit.html under My submissions.</p>
+      <p class="muted" style="margin-bottom:14px">For books: before approving, move the submitted file to R2 / site storage and paste the final read/download link and R2 key below (per submission). If the file link is already a final Cloudflare R2 link, you can approve it as-is.</p>
+      <div id="submissionList"></div>
+    </div>
+
   </div></main>
 </div>
 
@@ -312,13 +322,14 @@ function catLabel(id){
   return c.parentId && catMap()[c.parentId] ? catMap()[c.parentId].name + " › " + c.name : c.name;
 }
 async function refreshAll(){
-  const [cS,pS,sS,bS,qS,vS] = await Promise.all([
+  const [cS,pS,sS,bS,qS,vS,subS] = await Promise.all([
     getDocs(query(collection(db,"categories"), orderBy("order"))),
     getDocs(query(collection(db,"products"), orderBy("createdAt","desc"))),
     getDoc(doc(db,"siteContent","main")),
     getDocs(query(collection(db,"posts"), orderBy("createdAt","desc"))),
     getDocs(query(collection(db,"quotations"), orderBy("createdAt","desc"))),
-    getDocs(query(collection(db,"videos"), orderBy("createdAt","desc")))
+    getDocs(query(collection(db,"videos"), orderBy("createdAt","desc"))),
+    getDocs(query(collection(db,"submissions"), orderBy("createdAt","desc"))).catch(()=>({docs:[]}))
   ]);
   categories = cS.docs.map(d=>({id:d.id,...d.data()}));
   products = pS.docs.map(d=>({id:d.id,...d.data()}));
@@ -326,7 +337,8 @@ async function refreshAll(){
   window._quotations = qS.docs.map(d=>({id:d.id,...d.data()}));
   window._videos = vS.docs.map(d=>({id:d.id,...d.data()}));
   siteDoc = sS.exists() ? sS.data() : {};
-  renderProducts(); renderCats(); renderContent(); renderPosts(); renderQuotations(); renderVideos();
+  window._submissions = subS.docs.map(d=>({id:d.id,...d.data()}));
+  renderProducts(); renderCats(); renderContent(); renderPosts(); renderQuotations(); renderVideos(); renderSubmissions();
 }
 // Product/blog photos upload to ImgBB (free image hosting) — Firebase Storage
 // needs a paid plan, so uploads go here instead. Key is a public client key.
@@ -691,6 +703,77 @@ async function delVideo(id){
   try{ await deleteDoc(doc(db,"videos",id)); await refreshAll(); }
   catch(e){ alert("Delete failed: "+e.message); }
 }
+
+/* ---------------- submissions (public submit -> admin approval) ---------------- */
+function renderSubmissions(){
+  const w=$("submissionList"), subs=window._submissions||[];
+  if(!subs.length){ w.innerHTML=`<div class="card"><p class="muted">No submissions yet. Public submissions from submit.html will appear here as Under review.</p></div>`; return; }
+  w.innerHTML=subs.map(s=>{
+    const status=s.status||"pending";
+    const badge=status==="approved"?"Approved — published":status==="rejected"?"Rejected":"Under review";
+    return `<div class="card" style="margin-bottom:14px">
+      <h3>${esc(s.title||"")}</h3>
+      <p class="muted">${esc(s.type||"")} · by <a href="author.html?author=${encodeURIComponent(s.author||"")}" target="_blank">${esc(s.author||"")}</a> · ${esc(s.categoryName||s.suggestedCategory||"")} ${s.suggestedCategory?`(suggested: ${esc(s.suggestedCategory)})`:""} · <b>${badge}</b></p>
+      <p>${esc(s.description||"")}</p>
+      ${s.body?`<p class="muted">${esc(String(s.body).slice(0,300))}</p>`:""}
+      <p class="muted">Submitter: ${esc(s.submitterName||"")} ${s.submitterEmail?`· ${esc(s.submitterEmail)}`:""} · File: ${s.fileUrl?`<a href="${esc(s.fileUrl)}" target="_blank">open link</a>`:"—"} · Cover: ${s.coverUrl?`<a href="${esc(s.coverUrl)}" target="_blank">open</a>`:"—"} · R2 key: ${esc(s.cloudflareKey||"—")}</p>
+      <p class="muted">ID: ${esc(s.id)}</p>
+      <div class="field"><label>Final category (for approval)</label><select id="subCat-${s.id}"></select><small class="muted">Choose an existing category, or “Create suggested category” to create “${esc(s.suggestedCategory||"")}”.</small></div>
+      <div class="field"><label>Final read/download link (R2 stream / file link, for books)</label><input id="subFile-${s.id}" value="${esc(s.fileUrl||"")}"></div>
+      <div class="field"><label>Final R2 key (optional)</label><input id="subR2-${s.id}" value="${esc(s.cloudflareKey||"")}"></div>
+      <div class="field"><label>Admin message (shown to submitter on rejection, and kept on approval)</label><textarea id="subNote-${s.id}" style="min-height:70px">${esc(s.adminNote||"")}</textarea></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-brand btn-sm" data-approve="${s.id}" style="width:auto">Approve &amp; Publish</button>
+        <button class="btn btn-danger btn-sm" data-reject="${s.id}" style="width:auto">Reject</button>
+      </div>
+    </div>`}).join("");
+  subs.forEach(s=>{
+    const sel=$("subCat-"+s.id);
+    sel.innerHTML=`<option value="">(keep submitted category)</option>`+categories.map(c=>`<option value="${c.id}" ${c.id===s.categoryId?"selected":""}>${esc(c.name)}</option>`).join("")+`<option value="__new__">Create suggested category: ${esc(s.suggestedCategory||"(none)")}</option>`;
+  });
+  w.querySelectorAll("[data-approve]").forEach(b=>b.onclick=()=>approveSubmission(b.dataset.approve));
+  w.querySelectorAll("[data-reject]").forEach(b=>b.onclick=()=>rejectSubmission(b.dataset.reject));
+}
+async function approveSubmission(id){
+  const s=(window._submissions||[]).find(x=>x.id===id); if(!s) return;
+  if(!confirm(`Approve "${s.title}" and publish it?`)) return;
+  try{
+    let catId=$("subCat-"+id).value||s.categoryId||"";
+    let catName=s.categoryName||"";
+    if($("subCat-"+id).value==="__new__" && s.suggestedCategory){
+      const ref=await addDoc(collection(db,"categories"),{name:s.suggestedCategory,parentId:null,order:999});
+      catId=ref.id; catName=s.suggestedCategory;
+    } else if(catId){ const c=categories.find(x=>x.id===catId); catName=c?c.name:catName; }
+    const finalFile=$("subFile-"+id).value.trim(); const finalR2=$("subR2-"+id).value.trim(); const note=$("subNote-"+id).value.trim();
+    let publishedId="", publishedUrl="";
+    if(s.type==="Book"){
+      const ref=await addDoc(collection(db,"products"),{name:s.title,author:s.author,categoryId:catId,description:s.description,images:s.coverUrl?[s.coverUrl]:[],readUrl:finalFile,downloadUrl:finalFile,cloudflareKey:finalR2,pageCount:0,createdAt:serverTimestamp()});
+      publishedId=ref.id; publishedUrl="book.html?id="+ref.id;
+    } else if(s.type==="Quotation"){
+      const ref=await addDoc(collection(db,"quotations"),{text:s.body||s.description,author:s.author,createdAt:serverTimestamp()});
+      publishedId=ref.id; publishedUrl="quotations.html";
+    } else if(s.type==="Video"){
+      const ref=await addDoc(collection(db,"videos"),{title:s.title,youtubeUrl:finalFile,description:s.description,createdAt:serverTimestamp()});
+      publishedId=ref.id; publishedUrl="videos.html";
+    } else {
+      const ref=await addDoc(collection(db,"posts"),{title:s.title,body:s.body||s.description,imageUrl:s.coverUrl||"",tag:catName,author:s.author,createdAt:serverTimestamp()});
+      publishedId=ref.id; publishedUrl="post.html?id="+ref.id;
+    }
+    await updateDoc(doc(db,"submissions",id),{status:"approved",adminNote:note,publishedId,publishedUrl,categoryId:catId,categoryName:catName,reviewedAt:serverTimestamp()});
+    alert("Published. Author page: author.html?author="+encodeURIComponent(s.author));
+    await refreshAll();
+  }catch(e){ alert("Approve failed: "+e.message); }
+}
+async function rejectSubmission(id){
+  const s=(window._submissions||[]).find(x=>x.id===id); if(!s) return;
+  const note=$("subNote-"+id).value.trim();
+  if(!note && !confirm("Reject without a message? The submitter will only see 'Rejected'.")) return;
+  try{
+    await updateDoc(doc(db,"submissions",id),{status:"rejected",adminNote:note,reviewedAt:serverTimestamp()});
+    await refreshAll();
+  }catch(e){ alert("Reject failed: "+e.message); }
+}
+
 </script>
 </body>
 </html>
