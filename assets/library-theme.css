@@ -1,0 +1,59 @@
+/* Ibnnak Library Theme — original code, Ketabesabz/Noorlib patterns only.
+   Loaded AFTER each page's inline style, so it overrides the old theme
+   without editing any page logic, Firebase code, reader or download code.
+   Palette: green #1f9d5c, dark green #157a46, navy #16294b, navy-dark #0f1d36,
+   gold #e5a800, red #d6455a (active pagination), pale grey #f1f3f2. */
+:root{
+  --bg:#f1f3f2; --card:#ffffff; --ink:#1d2422; --muted:#5f6f6d;
+  --brand:#1f9d5c; --brand-dark:#157a46; --gold:#e5a800; --gold-soft:#eef7f1;
+  --line:#dde3e1; --shadow:0 6px 20px rgba(22,41,75,.08);
+  --header-bg:#ffffff; --hero-glow:#e4f0ec;
+}
+[data-theme="dark"]{
+  --bg:#141a19; --card:#1e2625; --ink:#eef3f2; --muted:#a8b8b5;
+  --brand:#4fc08a; --brand-dark:#3aa06f; --gold:#e5a800; --gold-soft:#243528;
+  --line:#33413f; --shadow:0 6px 20px rgba(0,0,0,.45);
+  --header-bg:#1e2625; --hero-glow:#1e2b24;
+}
+/* Utility strip — Ketabesabz pattern */
+.lib-topbar{background:#eef1ef;border-bottom:1px solid var(--line);font-size:.88rem}
+[data-theme="dark"] .lib-topbar{background:#1a2220}
+.lib-topbar .wrap{max-width:1160px;margin:0 auto;padding:.4rem 20px;display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.lib-topbar a{color:var(--muted);text-decoration:none;margin-right:1rem}
+.lib-topbar a:hover{color:var(--brand-dark)}
+/* Header row: white, logo + actions (original nav links are moved to the green bar) */
+header{background:var(--header-bg)}
+.nav-links{display:none !important}
+/* Green navigation bar — Ketabesabz pattern */
+.lib-nav{background:var(--brand)}
+.lib-nav .wrap{max-width:1160px;margin:0 auto;padding:0 20px;display:flex;flex-wrap:wrap}
+.lib-nav a{color:#fff !important;text-decoration:none;padding:.7rem 1rem;font-weight:600;font-size:.92rem;white-space:nowrap}
+.lib-nav a:hover,.lib-nav a.active{background:var(--brand-dark)}
+/* Book grids: 5 per row on desktop — shared Ketabesabz/Noorlib pattern */
+@media (min-width:1100px){
+  .grid{grid-template-columns:repeat(5,1fr) !important;gap:16px !important}
+}
+@media (min-width:760px) and (max-width:1099px){
+  .grid{grid-template-columns:repeat(3,1fr) !important}
+}
+@media (max-width:759px){
+  .grid{grid-template-columns:repeat(2,1fr) !important;gap:14px !important}
+}
+.card .body{padding:12px}
+.card h3{font-size:.98rem}
+.card .cat{color:var(--brand-dark)}
+/* Navy footer — Noorlib pattern */
+footer{background:#16294b !important;color:#dbe4f0 !important;text-align:left !important;padding:0 !important}
+.lib-footer-grid{max-width:1160px;margin:0 auto;padding:2rem 20px;display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem}
+.lib-footer-grid h3{color:#fff;margin:0 0 .5rem;font-size:1rem}
+.lib-footer-grid a{color:#dbe4f0 !important;text-decoration:none;display:block;padding:.2rem 0;font-size:.92rem}
+.lib-footer-grid a:hover{color:#e5a800 !important}
+.lib-footer-bottom{background:#0f1d36;text-align:center;padding:.9rem 20px;font-size:.88rem;color:#dbe4f0}
+.lib-footer-bottom .brand{color:#fff !important;font-size:1rem}
+@media (max-width:760px){
+  .lib-footer-grid{grid-template-columns:repeat(2,1fr)}
+  .lib-nav a{padding:.6rem .7rem}
+}
+@media (max-width:480px){
+  .lib-footer-grid{grid-template-columns:1fr}
+}
