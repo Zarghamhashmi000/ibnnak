@@ -53,3 +53,14 @@ footer{background:#16294b !important;color:#dbe4f0 !important;text-align:left !i
 .lib-footer-bottom{background:#0f1d36;text-align:center;padding:.9rem 20px}
 @media(max-width:760px){.lib-footer-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:480px){.lib-footer-grid{grid-template-columns:1fr}}
+
+[data-theme="dark"]{--bg:#141a19;--card:#1e2625;--ink:#eef2f1;--muted:#a8b8b5;--line:#33413f;--green:#2bb673;--green-dark:#1f9d5c;--navy:#16294b;--navy-dark:#0f1d36;--gold:#e5a800;--red:#d6455a}
+[data-theme="dark"] .topbar,[data-theme="dark"] .lib-topbar{background:#1e2625}
+[data-theme="dark"] .header,[data-theme="dark"] header{background:var(--card)}
+[data-theme="dark"] .search input,[data-theme="dark"] .lib-search input{background:var(--card);color:var(--ink)}
+[data-theme="dark"] .pagination a{background:var(--card);color:var(--ink)}
+[data-theme="dark"] .directory a{color:#7aa2ff}
+[data-theme="dark"] section{background:var(--card)}
+[data-theme="dark"] .drawer{background:var(--card);color:var(--ink)}
+[data-theme="dark"] .card .ph,[data-theme="dark"] .rand .thumb{background:#24423a;color:#7ed4a8}
+[data-theme="dark"] .lib-footer-grid a{color:#dbe4f0}
