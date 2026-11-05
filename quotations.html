@@ -73,8 +73,11 @@
   @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
   @media(max-width:900px){.nav-links{display:none}}
 </style>
+<link rel="stylesheet" href="assets/library-theme.css">
 </head>
 <body>
+<div class="lib-topbar"><div class="wrap"><div><a href="index.html">Home</a><a href="books.html">Books</a><a href="articles.html">Articles</a></div><div><a href="admin.html">Owner Dashboard</a></div></div></div>
+
 
 <header>
   <div class="wrap nav">
@@ -90,6 +93,8 @@
     <button class="theme-btn" id="themeToggle" aria-label="Switch to dark mode"></button>
   </div>
 </header>
+<nav class="lib-nav"><div class="wrap"><a href="index.html">Home Page</a><a href="books.html">Books</a><a href="articles.html">Articles</a><a href="quotations.html" class="active">Quotations</a><a href="videos.html">Videos</a><a href="palmistry.html">Palmistry</a></div></nav>
+
 
 <div class="page-hero">
   <div class="wrap">
@@ -108,14 +113,13 @@
 </main>
 
 <footer>
-  <div class="wrap">
-    <div class="brand serif">Ibnnak</div>
-    <nav>
-      <a href="index.html">Home Page</a><a href="books.html">Books</a><a href="articles.html">Articles</a>
-      <a href="quotations.html">Quotations</a><a href="videos.html">Videos</a><a href="palmistry.html">Palmistry</a>
-    </nav>
-    <div>© <span id="yr"></span> Ibnnak. All rights reserved.</div>
+  <div class="lib-footer-grid">
+    <div><h3>Browse</h3><a href="books.html">All books</a><a href="index.html">Home Page</a><a href="articles.html">Articles</a></div>
+    <div><h3>About</h3><a href="index.html">About Ibnnak</a><a href="palmistry.html">Palmistry</a><a href="videos.html">Videos</a></div>
+    <div><h3>Library</h3><a href="books.html">Books</a><a href="quotations.html">Quotations</a><a href="videos.html">Videos</a></div>
+    <div><h3>Help</h3><a href="books.html">How reading works</a><a href="download.html">How downloading works</a><a href="index.html">Contact</a></div>
   </div>
+  <div class="lib-footer-bottom"><span class="brand serif">Ibnnak</span> · © <span id="yr"></span> Ibnnak. All rights reserved.</div>
 </footer>
 
 <script src="firebase-config.js"></script>
