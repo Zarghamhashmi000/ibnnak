@@ -10,6 +10,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{--green:#1f9d5c;--green-dark:#157a46;--navy:#16294b;--navy-dark:#0f1d36;--teal:#0e8f8f;--gold:#e5a800;--red:#d6455a;--bg:#f1f3f2;--card:#fff;--ink:#1d2422;--muted:#5f6f6d;--line:#dde3e1;--radius:12px}
+[data-theme="dark"]{--bg:#141a19;--card:#1e2625;--ink:#eef2f1;--muted:#a8b8b5;--line:#33413f;--green:#2bb673;--green-dark:#1f9d5c;--navy:#16294b;--navy-dark:#0f1d36;--gold:#e5a800;--red:#d6455a}
+[data-theme="dark"] .topbar{background:#1e2625}
+[data-theme="dark"] .header{background:var(--card)}
+[data-theme="dark"] .search input{background:var(--card);color:var(--ink)}
+[data-theme="dark"] .pagination a{background:var(--card);color:var(--ink)}
+[data-theme="dark"] .directory a{color:#7aa2ff}
 *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.6} a{color:inherit} img{display:block;max-width:100%}
 .topbar{background:#eef1ef;border-bottom:1px solid var(--line);font-size:.88rem}.topbar .wrap{max-width:1180px;margin:auto;padding:.4rem 1rem;display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:center}.topbar a{color:var(--muted);text-decoration:none;margin-right:1rem}.topbar button{background:none;border:0;color:var(--muted);cursor:pointer;font-size:.88rem;margin-right:.5rem}
 .header{background:var(--card);border-bottom:1px solid var(--line)}.header .wrap{max-width:1180px;margin:auto;padding:1rem;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap}.logo{font-family:Fraunces,Georgia,serif;font-size:1.7rem;font-weight:700;text-decoration:none;color:var(--ink)}.logo span{color:var(--green)}.logo small{display:block;font-family:Inter,sans-serif;font-size:.8rem;font-weight:400;color:var(--muted)}
@@ -78,7 +84,7 @@
 
 <footer class="footer"><div class="wrap">
 <div><h3>Browse</h3><a href="books.html">All books</a><a href="books.html">Search books</a><a href="books.html">Categories</a></div>
-<div><h3>About</h3><a href="index.html">About</a><a href="index.html">Contact</a><a href="books.html">Submit a book</a></div>
+<div><h3>About</h3><a href="index.html">About</a><a href="index.html">Contact</a><a href="books.html">Browse Books</a></div>
 <div><h3>Legal</h3><a href="index.html">Terms of use</a><a href="index.html">Privacy</a><a href="index.html">Copyright policy</a><a href="index.html">Takedown request</a></div>
 <div><h3>Help</h3><a href="books.html">How reading works</a><a href="books.html">How downloading works</a><a href="index.html">Report a problem</a></div>
 </div><div class="bottom">© <span id="yr"></span> Ibnnak. All rights reserved.</div></footer>
@@ -99,7 +105,7 @@ let wish=[]; try{wish=JSON.parse(localStorage.getItem("abk_wish")||"[]")}catch(e
 function saveWish(){try{localStorage.setItem("abk_wish",JSON.stringify(wish))}catch(e){}}
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-function applyTheme(t){document.documentElement.dataset.theme=t;try{localStorage.setItem("abk_theme",t)}catch(e){}}
+function applyTheme(t){document.documentElement.dataset.theme=t;try{localStorage.setItem("abk_theme",t)}catch(e){}var b=$("themeToggle");if(b)b.textContent=t==="dark"?"☀ Light mode":"◐ Dark mode"}
 let savedTheme="light"; try{savedTheme=localStorage.getItem("abk_theme")||"light"}catch(e){} applyTheme(savedTheme);
 $("themeToggle").addEventListener("click",()=>{applyTheme(document.documentElement.dataset.theme==="dark"?"light":"dark")});
 const catMap=()=>Object.fromEntries(categories.map(c=>[c.id,c]));
