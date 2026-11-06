@@ -106,6 +106,8 @@
     <div class="field"><label>Email</label><input type="email" id="email" autocomplete="username" placeholder="you@example.com"></div>
     <div class="field"><label>Password</label><input type="password" id="password" autocomplete="current-password" placeholder="••••••••"></div>
     <button class="btn btn-brand" id="loginBtn">Sign In</button>
+    <button class="btn btn-ghost" id="forgotBtn" type="button" style="margin-top:10px">Forgot password?</button>
+    <div class="ok" id="resetMsg" style="display:none;margin-top:10px"></div>
     <div class="hint" id="cfgHint" style="display:none">Firebase is not configured yet.<br>See README.md to connect your project first.</div>
   </div>
 </div>
@@ -268,7 +270,7 @@
 <script type="module">
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, getDocs, getDoc, doc, addDoc, setDoc, updateDoc, deleteDoc, query, orderBy, where, serverTimestamp } from "firebase/firestore";
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "firebase/auth";
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 
 /* ---------------- helpers ---------------- */
@@ -308,6 +310,22 @@ if (auth){
     }
   };
   $("password").addEventListener("keydown", e=>{ if(e.key==="Enter") $("loginBtn").click(); });
+  $("forgotBtn").onclick = async () => {
+    var msg = $("resetMsg"); msg.style.display="none";
+    loginError(""); $("loginErr").style.display="none";
+    var email = $("email").value.trim();
+    if(!email){ loginError("Type your admin email above first, then tap Forgot password?"); return; }
+    try{
+      await sendPasswordResetEmail(auth, email);
+      msg.textContent = "Reset email sent to " + email + " — check your inbox (and spam), open the link, set a new password, then sign in here.";
+      msg.style.display="block";
+    }catch(e){
+      var m = {"auth/invalid-email":"That email address looks invalid.",
+               "auth/user-not-found":"No admin account with that email. Check the email, or create the user in Firebase Console → Authentication → Users → Add user.",
+               "auth/too-many-requests":"Too many attempts — try again in a few minutes."}[e.code];
+      loginError(m || ("Could not send reset email: " + e.message));
+    }
+  };
   $("logoutBtn").onclick = () => signOut(auth);
 }
 
