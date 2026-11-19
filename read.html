@@ -258,7 +258,16 @@ function renderPageViewer(p, pages){
         }
         return;
       }
-    }catch(e){ /* no local copy — fall through to the page photos */ }
+    }catch(e){ /* no local copy — fall through to the R2 link / page photos */ }
+    /* Books uploaded to Cloudflare R2: read the Worker's stream */
+    if (p.readUrl){
+      root.innerHTML = `
+          <div class="viewer">
+            <iframe id="bookFrame" src="${esc(p.readUrl)}" title="${esc(p.name)}" loading="lazy"></iframe>
+          </div>
+          <p class="open-link">This book is hosted on Ibnnak's file storage. Trouble viewing? <a id="directLink" href="${esc(p.readUrl)}" target="_blank" rel="noopener">Open the book file directly</a>.</p>`;
+      return;
+    }
     const pages = (p.images && p.images.length ? p.images : (p.imageUrl ? [p.imageUrl] : []));
     if (!pages.length){
       showState("Not available to read online yet", "This book does not have readable pages yet — please check back soon.", id);
