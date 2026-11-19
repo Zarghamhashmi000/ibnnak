@@ -143,7 +143,9 @@
           <div class="field"><label>Book title *</label><input id="pfName" placeholder="e.g. The Sealed Nectar (Ar-Raheeq Al-Makhtum)"></div>
           <div class="field"><label>Author</label><input id="pfAuthor" placeholder="e.g. Safiur Rahman Mubarakpuri"></div>
           <div class="field"><label>Category *</label><select id="pfCategory"></select></div>
-          <div class="field"><label>Download File URL (file lives on this site)</label><input id="pfDownloadUrl" placeholder="books/my-book.pdf"><small>Reading is always from the page photos you upload here — never an outside link. For downloads, send the book file to Muse: it is placed inside this site and this box is filled for you.</small></div>
+          <div class="field"><label>Download File URL (file lives on this site)</label><input id="pfDownloadUrl" placeholder="books/my-book.pdf"><small>Or paste a file link here (archive.org, Drive…). If you upload a PDF below, this fills itself in.</small></div>
+          <div class="field"><label>Book PDF — upload to Cloudflare R2</label><input id="pfPdf" type="file" accept="application/pdf"><small id="pfPdfStatus">Pick a PDF to upload it straight to R2 (books/…), or paste a file link in the box above instead.</small></div>
+          <input type="hidden" id="pfCloudflareKey">
           <div class="field"><label>Download Price</label><input id="pfDownloadPrice" type="number" min="0" placeholder="e.g. 500"></div>
           <div class="field"><label>Pages (optional)</label><input id="pfPageCount" type="number" min="0" placeholder="e.g. 320"></div>
           <div class="field"><label>Cover &amp; Page Photos <small style="font-weight:400;color:#7d7466">(cover first, then the book's readable pages in order — you can select more than one)</small></label><input id="pfImage" type="file" accept="image/*" multiple><div class="thumbs" id="pfThumbs"></div></div>
@@ -279,6 +281,20 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt
 const fmt = n => "Rs " + Number(n || 0).toLocaleString("en-US");
 let db=null, auth=null, storage=null, app=null;
 let categories=[], products=[], siteDoc={};
+
+/* Cloudflare R2 file gateway (Worker) — direct PDF uploads go here. */
+const WORKER_URL = "https://ibnnak-files.zarghamhaider722.workers.dev";
+function slugify(s){ return String(s||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,80) || "book"; }
+async function uploadPdfToR2(file, key){
+  const user = auth && auth.currentUser;
+  if(!user) throw new Error("Sign in as admin first.");
+  const token = await user.getIdToken();
+  const res = await fetch(WORKER_URL + "/upload?key=" + encodeURIComponent(key), { method:"POST", headers:{ Authorization:"Bearer "+token, "Content-Type": file.type || "application/pdf" }, body: file });
+  const out = await res.json().catch(()=>({}));
+  if(!res.ok) throw new Error((out && out.error) || ("Upload failed ("+res.status+")"));
+  return out;
+}
+let pfCloudflareKey = "";
 
 function loginError(msg){ const e=$("loginErr"); e.textContent=msg; e.style.display="block"; }
 
@@ -438,6 +454,8 @@ function resetProductForm(){
   $("pfId").value=""; $("pfName").value=""; $("pfAuthor").value=""; $("pfDesc").value="";
   $("pfImage").value=""; $("pfOk").style.display="none";
   $("pfDownloadUrl").value=""; $("pfDownloadPrice").value=""; $("pfPageCount").value="";
+  $("pfPdf").value=""; $("pfCloudflareKey").value=""; pfCloudflareKey="";
+  $("pfPdfStatus").textContent="Pick a PDF to upload it straight to R2 (books/…), or paste a file link in the box above instead.";
   pfKept=[]; pfNewFiles=[]; renderPfThumbs();
   $("pfTitle").textContent="Add Book"; fillCatSelect($("pfCategory"));
 }
@@ -448,6 +466,19 @@ $("pfImage").onchange = e=>{
   $("pfImage").value="";
   renderPfThumbs();
 };
+$("pfPdf").onchange = async e=>{
+  const f = e.target.files && e.target.files[0]; if(!f) return;
+  const st = $("pfPdfStatus"); st.textContent = "Uploading “"+f.name+"” to R2…";
+  try{
+    const title = $("pfName").value.trim() || f.name.replace(/\.pdf$/i,"");
+    const key = "books/" + slugify(title) + ".pdf";
+    await uploadPdfToR2(f, key);
+    pfCloudflareKey = key; $("pfCloudflareKey").value = key;
+    $("pfDownloadUrl").value = WORKER_URL + "/download/" + key;
+    st.textContent = "Uploaded ✓ " + key + " — read & download links now point at R2.";
+  }catch(err){ st.textContent = "Upload failed: " + err.message; }
+  $("pfPdf").value="";
+};
 function editProduct(id){
   const p = products.find(x=>x.id===id); if(!p) return;
   resetProductForm();
@@ -455,6 +486,8 @@ function editProduct(id){
   $("pfName").value=p.name||""; $("pfAuthor").value=p.author||""; $("pfDesc").value=p.description||"";
   $("pfCategory").value=p.categoryId||"";
   $("pfDownloadUrl").value=p.downloadUrl||"";
+  pfCloudflareKey = p.cloudflareKey||""; $("pfCloudflareKey").value = pfCloudflareKey;
+  if (pfCloudflareKey) $("pfPdfStatus").textContent = "Current R2 file: " + pfCloudflareKey + " — pick a new PDF to replace it.";
   $("pfDownloadPrice").value=(p.downloadPrice!=null?p.downloadPrice:"");
   $("pfPageCount").value=(p.pageCount!=null?p.pageCount:"");
   pfKept = pImages(p).slice(); renderPfThumbs();
@@ -482,6 +515,8 @@ $("pfSave").onclick = async ()=>{
     const pageCount = pcRaw === "" ? null : Number(pcRaw);
     const data={name, author:$("pfAuthor").value.trim(), categoryId:cat, description:$("pfDesc").value.trim(),
       images, imageUrl, downloadUrl:$("pfDownloadUrl").value.trim(),
+      readUrl: pfCloudflareKey ? (WORKER_URL + "/read/" + pfCloudflareKey) : (old?.readUrl || ""),
+      cloudflareKey: pfCloudflareKey,
       downloadPrice, pageCount, createdAt: old?.createdAt || serverTimestamp()};
     if(id) await updateDoc(doc(db,"products",id), data);
     else await addDoc(collection(db,"products"), data);
