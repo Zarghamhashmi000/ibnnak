@@ -126,3 +126,9 @@ table{display:block;overflow-x:auto;max-width:100%}
   .brand.logo{flex:1 1 220px;min-width:0;overflow-wrap:break-word}
   .brand.logo small{white-space:normal}
 }
+
+/* Book-page header was orange: the shared .nav{background:var(--green)} rule
+   also matches the header container (<div class="wrap-wide nav">) on the
+   older pages, painting it orange — the orange "aak" in the logo then
+   vanished (orange on orange). Restore the page's own header background. */
+header .wrap-wide.nav{background:var(--header-bg,#fff)}
