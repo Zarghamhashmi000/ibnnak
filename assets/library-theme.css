@@ -128,7 +128,10 @@ table{display:block;overflow-x:auto;max-width:100%}
 }
 
 /* Book-page header was orange: the shared .nav{background:var(--green)} rule
-   also matches the header container (<div class="wrap-wide nav">) on the
-   older pages, painting it orange — the orange "aak" in the logo then
-   vanished (orange on orange). Restore the page's own header background. */
-header .wrap-wide.nav{background:var(--header-bg,#fff)}
+   also matches the header container on the older pages, painting it orange —
+   the orange "aak" in the logo then vanished (orange on orange). Restore the
+   page's own header background. Book/post/read/download use
+   <div class="wrap-wide nav">; articles/quotations/videos/palmistry use
+   <div class="wrap nav"> — cover both (2026-11-22: the .wrap.nav pages were
+   missed by the 2026-11-21 fix and stayed orange). */
+header .wrap-wide.nav, header .wrap.nav{background:var(--header-bg,#fff)}
