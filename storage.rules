@@ -1,6 +1,6 @@
 rules_version = '2';
 
-// Ibnnak — Firebase Storage security rules
+// Ibnaak — Firebase Storage security rules
 // Public can READ product/blog images (they render on the shop).
 // Only signed-in admins can UPLOAD/DELETE images.
 
