@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Read Online — Ibnnak</title>
-<meta name="description" content="Ibnnak — a free online library. Read this book online, free, page by page.">
+<title>Read Online — Ibnaak</title>
+<meta name="description" content="Ibnaak — a free online library. Read this book online, free, page by page.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -93,7 +93,7 @@
 
 <header>
   <div class="wrap-wide nav">
-    <a class="brand logo" href="index.html">Ibn<span>nak</span><small>Read Books Online, Free</small></a>
+    <a class="brand logo" href="index.html">Ibn<span>aak</span><small>Read Books Online, Free</small></a>
     <nav class="nav-links">
       <a href="index.html">Home Page</a>
       <a href="books.html" class="here">Books</a>
@@ -123,11 +123,11 @@
 <footer>
   <div class="lib-footer-grid">
     <div><h3>Browse</h3><a href="books.html">All books</a><a href="index.html">Home Page</a><a href="articles.html">Articles</a></div>
-    <div><h3>About</h3><a href="index.html">About Ibnnak</a><a href="palmistry.html">Palmistry</a><a href="videos.html">Videos</a></div>
+    <div><h3>About</h3><a href="index.html">About Ibnaak</a><a href="palmistry.html">Palmistry</a><a href="videos.html">Videos</a></div>
     <div><h3>Library</h3><a href="books.html">Books</a><a href="quotations.html">Quotations</a><a href="videos.html">Videos</a></div>
     <div><h3>Help</h3><a href="books.html">How reading works</a><a href="download.html">How downloading works</a><a href="index.html">Contact</a></div>
   </div>
-  <div class="lib-footer-bottom"><span class="brand serif">Ibnnak</span> · © <span id="yr"></span> Ibnnak. All rights reserved. · <a href="legal.html" style="color:inherit">Legal</a></div>
+  <div class="lib-footer-bottom"><span class="brand serif">Ibnaak</span> · © <span id="yr"></span> Ibnaak. All rights reserved. · <a href="legal.html" style="color:inherit">Legal</a></div>
 </footer>
 
 <script src="firebase-config.js"></script>
@@ -228,9 +228,9 @@ function renderPageViewer(p, pages){
     const snap = await getDoc(doc(db, "products", id));
     if (!snap.exists()){ showState("Book not found", "This book may have been moved or removed.", id); return; }
     const p = { id: snap.id, ...snap.data() };
-    document.title = (p.name || "Book") + " — Read Online — Ibnnak";
+    document.title = (p.name || "Book") + " — Read Online — Ibnaak";
     document.getElementById("readerTitle").textContent = p.name || "Read Online";
-    /* Books hosted inside Ibnnak: read the site's own file — nothing is fetched from outside */
+    /* Books hosted inside Ibnaak: read the site's own file — nothing is fetched from outside */
     try{
       const localMap = await (await fetch("books-data.json", {cache:"no-store"})).json();
       const local = localMap && localMap[p.id];
@@ -242,7 +242,7 @@ function renderPageViewer(p, pages){
           <div class="viewer">
             <iframe id="bookFrame" src="${esc(local.file)}" title="${esc(p.name)}" loading="lazy"></iframe>
           </div>
-          <p class="open-link">This book lives on Ibnnak. Trouble viewing? <a id="directLink" href="${esc(local.file)}" target="_blank" rel="noopener">Open the book file directly</a>.</p>`;
+          <p class="open-link">This book lives on Ibnaak. Trouble viewing? <a id="directLink" href="${esc(local.file)}" target="_blank" rel="noopener">Open the book file directly</a>.</p>`;
         if (parts){
           const frame = document.getElementById("bookFrame");
           const direct = document.getElementById("directLink");
@@ -265,7 +265,7 @@ function renderPageViewer(p, pages){
           <div class="viewer">
             <iframe id="bookFrame" src="${esc(p.readUrl)}" title="${esc(p.name)}" loading="lazy"></iframe>
           </div>
-          <p class="open-link">This book is hosted on Ibnnak's file storage. Trouble viewing? <a id="directLink" href="${esc(p.readUrl)}" target="_blank" rel="noopener">Open the book file directly</a>.</p>`;
+          <p class="open-link">This book is hosted on Ibnaak's file storage. Trouble viewing? <a id="directLink" href="${esc(p.readUrl)}" target="_blank" rel="noopener">Open the book file directly</a>.</p>`;
       return;
     }
     const pages = (p.images && p.images.length ? p.images : (p.imageUrl ? [p.imageUrl] : []));
@@ -275,7 +275,7 @@ function renderPageViewer(p, pages){
     }
     renderPageViewer(p, pages);
   }catch(e){
-    console.warn("[Ibnnak] Could not load book for reading:", e.message);
+    console.warn("[Ibnaak] Could not load book for reading:", e.message);
     showState("Could not load this book", "Please check your connection and try again.", id);
   }
 })();
