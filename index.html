@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ibnnak — Read Books Online, Free</title>
-<meta name="description" content="Ibnnak — a free online library. Read books online, free: Islamic books, psychology, self-help, fiction and more.">
+<title>Ibnaak — Read Books Online, Free</title>
+<meta name="description" content="Ibnaak — a free online library. Read books online, free: Islamic books, psychology, self-help, fiction and more.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -69,7 +69,7 @@ input,select,textarea{font-size:16px}
 <body>
 <div class="topbar"><div class="wrap"><div><a href="index.html">Home</a><a href="books.html">Books</a><a href="articles.html">Articles</a><a href="admin.html">Owner Dashboard</a></div><div><button id="wishOpen" aria-label="Saved">♥ Saved <span id="wishCount" style="display:none">0</span></button><button id="themeToggle" aria-label="Switch theme">◐ Theme</button></div></div></div>
 <header class="header"><div class="wrap">
-<a class="logo" href="index.html">Ibn<span>nak</span><small>Read Books Online, Free</small></a>
+<a class="logo" href="index.html">Ibn<span>aak</span><small>Read Books Online, Free</small></a>
 <form class="search" id="libSearchForm"><input type="search" id="libSearchInput" placeholder="Search by book or author…" aria-label="Search books"><button type="submit">Search</button></form>
 <a class="submit" href="books.html">Browse Books</a>
 </div></header>
@@ -93,7 +93,7 @@ input,select,textarea{font-size:16px}
 <div class="filter"><h3>Language</h3><a href="books.html">English</a><a href="books.html">Urdu</a></div>
 </aside>
 <div>
-<h2 style="margin-top:0;font-family:Fraunces,Georgia,serif">All Books — Ibnnak</h2>
+<h2 style="margin-top:0;font-family:Fraunces,Georgia,serif">All Books — Ibnaak</h2>
 <p style="color:var(--muted)">No prices on cards — reading is free, download is on each book's own page.</p>
 <div class="grid" id="all"></div>
 <nav class="pagination" id="pagination"></nav>
@@ -107,14 +107,14 @@ input,select,textarea{font-size:16px}
 <aside class="aside"><h2>Random books</h2><div id="random"></div></aside>
 </div></div>
 
-<div class="about"><h2 style="font-family:Fraunces,Georgia,serif">About this library</h2><p id="aboutText">Ibnnak is a free online library. Every book can be read online, free. Downloading is a separate step, on the book's own download page only.</p></div>
+<div class="about"><h2 style="font-family:Fraunces,Georgia,serif">About this library</h2><p id="aboutText">Ibnaak is a free online library. Every book can be read online, free. Downloading is a separate step, on the book's own download page only.</p></div>
 
 <footer class="footer"><div class="wrap">
 <div><h3>Browse</h3><a href="books.html">All books</a><a href="books.html">Search books</a><a href="books.html">Categories</a></div>
 <div><h3>About</h3><a href="index.html">About</a><a href="index.html">Contact</a><a href="books.html">Browse Books</a></div>
 <div><h3>Legal</h3><a href="legal.html#terms">Terms of use</a><a href="legal.html#privacy">Privacy</a><a href="legal.html#copyright">Copyright policy</a><a href="legal.html#takedown">Takedown request</a></div>
 <div><h3>Help</h3><a href="books.html">How reading works</a><a href="books.html">How downloading works</a><a href="index.html">Report a problem</a></div>
-</div><div class="bottom">© <span id="yr"></span> Ibnnak. All rights reserved.</div></footer>
+</div><div class="bottom">© <span id="yr"></span> Ibnaak. All rights reserved.</div></footer>
 
 <div class="overlay" id="overlay"></div>
 <aside class="drawer" id="wishDrawer" aria-label="Saved"><div class="d-head"><h3>Saved Books</h3><button id="wishClose" aria-label="Close">×</button></div><div class="items" id="wishItems"></div></aside>
@@ -124,7 +124,7 @@ input,select,textarea{font-size:16px}
 <script type="module">
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, getDocs, getDoc, doc, query, orderBy } from "firebase/firestore";
-let db=null; const site={heroTitle:"Free ebooks to read online",heroSubtitle:"Browse by category and author. Reading is free — downloading is on the book's own download page only.",aboutText:"Ibnnak is a free online library. Every book can be read online, free. Downloading is a separate step, on the book's own download page only."};
+let db=null; const site={heroTitle:"Free ebooks to read online",heroSubtitle:"Browse by category and author. Reading is free — downloading is on the book's own download page only.",aboutText:"Ibnaak is a free online library. Every book can be read online, free. Downloading is a separate step, on the book's own download page only."};
 let categories=[],products=[],posts=[],quotations=[];
 const DEFAULT_CATEGORIES=["Islamic Books","Psychology","Self-Help","Fiction & Novels","History","Children's Books","Palmistry"];
 function displayCategories(){return categories.length?categories:DEFAULT_CATEGORIES.map((name,i)=>({id:"def-"+i,name,parentId:null,order:i}))}
@@ -170,7 +170,7 @@ function openWish(){renderWish();$("wishDrawer").classList.add("open");$("overla
 function closeWish(){$("wishDrawer").classList.remove("open");$("overlay").classList.remove("show")}
 $("wishOpen").onclick=openWish;$("wishClose").onclick=closeWish;$("overlay").onclick=closeWish;
 $("libSearchForm").addEventListener("submit",e=>{e.preventDefault();const q=$("libSearchInput").value.trim();location.href="books.html"+(q?"?q="+encodeURIComponent(q):"")});
-async function loadData(){if(typeof FIREBASE_CONFIGURED==="undefined"||!FIREBASE_CONFIGURED){console.warn("[Ibnnak] Firebase not configured");return}try{const app=initializeApp(firebaseConfig);db=getFirestore(app,"default");const [cSnap,pSnap,sSnap,bSnap,qSnap]=await Promise.all([getDocs(query(collection(db,"categories"),orderBy("order"))),getDocs(query(collection(db,"products"),orderBy("createdAt","desc"))),getDoc(doc(db,"siteContent","main")),getDocs(query(collection(db,"posts"),orderBy("createdAt","desc"))),getDocs(query(collection(db,"quotations"),orderBy("createdAt","desc")))]);categories=cSnap.docs.map(d=>({id:d.id,...d.data()}));products=pSnap.docs.map(d=>({id:d.id,...d.data()}));posts=bSnap.docs.map(d=>({id:d.id,...d.data()}));quotations=qSnap.docs.map(d=>({id:d.id,...d.data()}));if(sSnap.exists())Object.assign(site,sSnap.data())}catch(e){console.warn("[Ibnnak] Could not load data:",e.message)}}
+async function loadData(){if(typeof FIREBASE_CONFIGURED==="undefined"||!FIREBASE_CONFIGURED){console.warn("[Ibnaak] Firebase not configured");return}try{const app=initializeApp(firebaseConfig);db=getFirestore(app,"default");const [cSnap,pSnap,sSnap,bSnap,qSnap]=await Promise.all([getDocs(query(collection(db,"categories"),orderBy("order"))),getDocs(query(collection(db,"products"),orderBy("createdAt","desc"))),getDoc(doc(db,"siteContent","main")),getDocs(query(collection(db,"posts"),orderBy("createdAt","desc"))),getDocs(query(collection(db,"quotations"),orderBy("createdAt","desc")))]);categories=cSnap.docs.map(d=>({id:d.id,...d.data()}));products=pSnap.docs.map(d=>({id:d.id,...d.data()}));posts=bSnap.docs.map(d=>({id:d.id,...d.data()}));quotations=qSnap.docs.map(d=>({id:d.id,...d.data()}));if(sSnap.exists())Object.assign(site,sSnap.data())}catch(e){console.warn("[Ibnaak] Could not load data:",e.message)}}
 (async function(){await loadData();$("yr").textContent=new Date().getFullYear();if(site.heroTitle)$("heroTitle").textContent=site.heroTitle;if(site.heroSubtitle)$("heroSubtitle").textContent=site.heroSubtitle;if(site.aboutText)$("aboutText").textContent=site.aboutText;renderGrid($("fresh"),products.slice(0,5));const islamic=products.filter(p=>isInCategory(p,"Islamic"));renderGrid($("islamic"),islamic.slice(0,5));const lang=products.filter(p=>isInCategory(p,"Language & Grammar"));renderGrid($("language"),lang.slice(0,5));renderAll();renderFilters();renderDirectory();renderRandom();renderQuote();renderPosts();updateWishBadge();renderWish()})();
 </script>
 </body>
