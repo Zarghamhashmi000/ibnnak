@@ -113,3 +113,16 @@ table{display:block;overflow-x:auto;max-width:100%}
 @media(max-width:480px){
 .search,.lib-search,.search input,.lib-search input,.search button,.lib-search button{height:44px !important;min-height:44px}
 }
+
+/* Header fix (2026-11-21 audit): .lib-topbar had no flex rules at all, so its
+   links rendered jammed together ("HomeBooksArticles"), and at tablet widths
+   the brand logo could clip. Applies to book/articles/post/quotations/videos/
+   palmistry/read/download pages, which all use .lib-topbar. */
+.lib-topbar .wrap{max-width:1180px;margin:auto;padding:.4rem 1rem;display:flex;justify-content:space-between;gap:.5rem 1rem;flex-wrap:wrap}
+.lib-topbar a{color:var(--muted);text-decoration:none;margin-right:1rem}
+.lib-topbar a:last-child{margin-right:0}
+@media(max-width:1000px){
+  .wrap.nav{flex-wrap:wrap !important;height:auto !important;row-gap:.25rem}
+  .brand.logo{flex:1 1 220px;min-width:0;overflow-wrap:break-word}
+  .brand.logo small{white-space:normal}
+}
