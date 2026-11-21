@@ -1,7 +1,7 @@
 // ============================================================================
-// Ibnnak — Firebase configuration
+// Ibnaak — Firebase configuration
 // ----------------------------------------------------------------------------
-// TODO (before go-live): Ibnnak needs its OWN Firebase project.
+// TODO (before go-live): Ibnaak needs its OWN Firebase project.
 //  1. Create a free Firebase project at https://console.firebase.google.com
 //     (do NOT reuse any other shop's project — this shop is separate)
 //  2. Add a Web app ( </> ) to the project and copy its config values
