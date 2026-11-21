@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Palmistry — Ibnnak</title>
-<meta name="description" content="Ibnnak — a free online library. Palmistry books to read online, free, plus articles on the ancient art of reading the lines of the hand.">
+<title>Palmistry — Ibnaak</title>
+<meta name="description" content="Ibnaak — a free online library. Palmistry books to read online, free, plus articles on the ancient art of reading the lines of the hand.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -113,7 +113,7 @@
 
 <header>
   <div class="wrap nav">
-    <a class="brand logo" href="index.html">Ibn<span>nak</span><small>Read Books Online, Free</small></a>
+    <a class="brand logo" href="index.html">Ibn<span>aak</span><small>Read Books Online, Free</small></a>
     <nav class="nav-links">
       <a href="index.html">Home Page</a>
       <a href="books.html">Books</a>
@@ -164,11 +164,11 @@
 <footer>
   <div class="lib-footer-grid">
     <div><h3>Browse</h3><a href="books.html">All books</a><a href="index.html">Home Page</a><a href="articles.html">Articles</a></div>
-    <div><h3>About</h3><a href="index.html">About Ibnnak</a><a href="palmistry.html">Palmistry</a><a href="videos.html">Videos</a></div>
+    <div><h3>About</h3><a href="index.html">About Ibnaak</a><a href="palmistry.html">Palmistry</a><a href="videos.html">Videos</a></div>
     <div><h3>Library</h3><a href="books.html">Books</a><a href="quotations.html">Quotations</a><a href="videos.html">Videos</a></div>
     <div><h3>Help</h3><a href="books.html">How reading works</a><a href="download.html">How downloading works</a><a href="index.html">Contact</a></div>
   </div>
-  <div class="lib-footer-bottom"><span class="brand serif">Ibnnak</span> · © <span id="yr"></span> Ibnnak. All rights reserved. · <a href="legal.html" style="color:inherit">Legal</a></div>
+  <div class="lib-footer-bottom"><span class="brand serif">Ibnaak</span> · © <span id="yr"></span> Ibnaak. All rights reserved. · <a href="legal.html" style="color:inherit">Legal</a></div>
 </footer>
 
 <script src="firebase-config.js"></script>
@@ -248,7 +248,7 @@ document.getElementById("palmIntro").textContent = DEFAULT_INTRO;
         return `
         <div class="card" data-id="${esc(p.id)}">
           <button class="wish-heart${wished ? " on" : ""}" data-wish="${esc(p.id)}" aria-label="Save book">${HEART_SVG}</button>
-          ${thumb ? `<img src="${esc(thumb)}" alt="${esc(p.name)}" loading="lazy" decoding="async">` : `<div class="ph">Ibnnak</div>`}
+          ${thumb ? `<img src="${esc(thumb)}" alt="${esc(p.name)}" loading="lazy" decoding="async">` : `<div class="ph">Ibnaak</div>`}
           <div class="body">
             <div class="cat">Palmistry</div>
             <h3>${esc(p.name)}</h3>
@@ -278,13 +278,13 @@ document.getElementById("palmIntro").textContent = DEFAULT_INTRO;
           ? p.createdAt.toDate().toLocaleDateString("en-GB", {day:"numeric", month:"long", year:"numeric"}) : ""; }catch(e){}
         return `
         <a class="post" href="post.html?id=${encodeURIComponent(p.id)}" target="_blank" rel="noopener">
-          ${p.imageUrl ? `<img src="${esc(p.imageUrl)}" alt="${esc(p.title)}" loading="lazy" decoding="async">` : `<div class="ph">Ibnnak</div>`}
+          ${p.imageUrl ? `<img src="${esc(p.imageUrl)}" alt="${esc(p.title)}" loading="lazy" decoding="async">` : `<div class="ph">Ibnaak</div>`}
           <div class="body">${date ? `<div class="pdate">${esc(date)}</div>` : ""}<h3>${esc(p.title)}</h3><p>${esc((p.body || "").slice(0, 140))}…</p></div>
         </a>`;
       }).join("");
     }
   }catch(e){
-    console.warn("[Ibnnak] Could not load Palmistry page:", e.message);
+    console.warn("[Ibnaak] Could not load Palmistry page:", e.message);
     state(booksEl, "Could not load the Palmistry shelf", "Please check your connection and try again.");
     state(postsEl, "Could not load articles", "Please check your connection and try again.");
   }
