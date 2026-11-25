@@ -60,6 +60,9 @@
     line-height:1.5;color:var(--ink)}
   .q-card figcaption{margin-top:16px;color:var(--brand);font-weight:600;font-size:.9rem}
   .q-card figcaption::before{content:"— "}
+  .q-card img{width:100%;height:200px;object-fit:cover;border-radius:10px;margin-bottom:16px}
+  .q-card .q-title{font-size:1.15rem;color:var(--brand);margin-bottom:8px}
+  .q-card .q-cat{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:10px}
   .state{background:var(--card);border:1.5px dashed var(--line);border-radius:var(--radius);
     padding:56px 24px;text-align:center;color:var(--muted);grid-column:1/-1}
   .state h3{color:var(--brand);font-size:1.4rem;margin-bottom:8px}
@@ -156,6 +159,16 @@ import { getFirestore, collection, getDocs, query, orderBy } from "firebase/fire
 
 const grid = document.getElementById("quoteGrid");
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+/* URL allowlist for images: only https: and site-relative paths.
+   esc() stops markup injection but NOT javascript:/data: URLs. */
+function safeUrl(u){
+  const s = String(u || "").trim();
+  if(!s || s.startsWith("//")) return "#";
+  if(s.startsWith("https://")) return s;
+  if(s.startsWith("/")) return s;
+  if(/^[a-z][a-z0-9+.-]*:/i.test(s)) return "#";
+  return s; /* site-relative path */
+}
 function state(title, text){
   grid.innerHTML = `<div class="state"><h3>${esc(title)}</h3><p>${esc(text)}</p></div>`;
 }
@@ -168,12 +181,20 @@ function state(title, text){
   try{
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app, "default");
-    const snap = await getDocs(query(collection(db, "quotations"), orderBy("createdAt", "desc")));
-    const quotes = snap.docs.map(d => ({id: d.id, ...d.data()}));
+    const [qSnap, cSnap] = await Promise.all([
+      getDocs(query(collection(db, "quotations"), orderBy("createdAt", "desc"))),
+      getDocs(query(collection(db, "categories"), orderBy("order")))
+    ]);
+    const quotes = qSnap.docs.map(d => ({id: d.id, ...d.data()}));
+    const catMap = Object.fromEntries(cSnap.docs.map(d => [d.id, d.data()]));
+    const catName = id => (id && catMap[id]) ? catMap[id].name : "";
     if (!quotes.length){ state("Quotations Coming Soon", "New quotations are being gathered — please check back soon."); return; }
     grid.innerHTML = quotes.map(q => `
       <figure class="q-card">
+        ${q.imageUrl && safeUrl(q.imageUrl) !== "#" ? `<img src="${esc(safeUrl(q.imageUrl))}" alt="">` : ""}
         <span class="mark">“</span>
+        ${q.title ? `<h3 class="q-title">${esc(q.title)}</h3>` : ""}
+        ${catName(q.categoryId) ? `<div class="q-cat">${esc(catName(q.categoryId))}</div>` : ""}
         <blockquote>${esc(q.text || "")}</blockquote>
         ${q.author ? `<figcaption>${esc(q.author)}</figcaption>` : ""}
       </figure>`).join("");
