@@ -163,6 +163,17 @@ import { getFirestore, getDoc, doc } from "firebase/firestore";
 
 const root = document.getElementById("dlRoot");
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+/* URL allowlist for links and frames: only https: and site-relative paths.
+   esc() stops markup injection but NOT javascript:/data: URLs — those would
+   run on click (or load in a frame), so anything else becomes "#". */
+function safeUrl(u){
+  const s = String(u || "").trim();
+  if(!s || s.startsWith("//")) return "#";
+  if(s.startsWith("https://")) return s;
+  if(s.startsWith("/")) return s;
+  if(/^[a-z][a-z0-9+.-]*:/i.test(s)) return "#";
+  return s; /* site-relative path, e.g. book.html?id=… or books/….pdf */
+}
 const fmtAmount = n => "Rs " + Number(n || 0).toLocaleString("en-US");
 
 function showState(title, text){
@@ -212,8 +223,11 @@ function showState(title, text){
         if(!chk.ok) fileUrls = [];
       }catch(_){ /* keep the button */ }
     }
+    /* Drop any link whose scheme is not allowed (javascript:, data:, …) —
+       it would run on click, so it never becomes a button. */
+    fileUrls = fileUrls.filter(u => safeUrl(u) !== "#");
     const dlLabel = i => localParts ? "Download Part " + (i + 1) + " (PDF)" : (isFree ? "Download this book (PDF)" : "Download your book (PDF)");
-    const dlButtons = fileUrls.map((u, i) => `<a class="btn btn-dl" href="${esc(u)}" target="_blank" rel="noopener"${i ? ' style="margin-top:10px"' : ''}>${dlLabel(i)}</a>`).join("");
+    const dlButtons = fileUrls.map((u, i) => `<a class="btn btn-dl" href="${esc(safeUrl(u))}" target="_blank" rel="noopener"${i ? ' style="margin-top:10px"' : ''}>${dlLabel(i)}</a>`).join("");
 
     /* Step 1 — payment (skipped visually when the download is free) */
     let step1 = "";
@@ -224,7 +238,7 @@ function showState(title, text){
       <div class="step-box">
         <h2>Step 1 — Pay</h2>
         ${paymentNote ? `<p>${esc(paymentNote)}</p>` : ""}
-        <a class="btn btn-brand" href="${esc(paymentLink)}" target="_blank" rel="noopener">Pay &amp; Download</a>
+        <a class="btn btn-brand" href="${esc(safeUrl(paymentLink))}" target="_blank" rel="noopener">Pay &amp; Download</a>
       </div>`;
     } else if (paymentNote){
       step1 = `
