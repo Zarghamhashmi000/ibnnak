@@ -127,6 +127,7 @@
     <button class="tab" data-tab="blog">Blog</button>
     <button class="tab" data-tab="quotations">Quotations</button>
     <button class="tab" data-tab="videos">Videos</button>
+    <button class="tab" data-tab="palmistry">Palmistry</button>
     <button class="tab" data-tab="submissions">Submissions</button>
   </div></div>
 
@@ -202,7 +203,7 @@
         <h3 id="bfTitle">Add Post</h3>
         <input type="hidden" id="bfId">
         <div class="field"><label>Title *</label><input id="bfName" placeholder="Post title"></div>
-        <div class="field"><label>Tag <small class="muted">(optional — tag an article “Palmistry” to feature it on the Palmistry page)</small></label><input id="bfTag" placeholder="e.g. Palmistry"></div>
+        <div class="field"><label>Tag <small class="muted">(optional — Palmistry has its own section now, use the Palmistry tab)</small></label><input id="bfTag" placeholder="e.g. Featured"></div>
         <div class="field"><label>Image (optional)</label><input id="bfImage" type="file" accept="image/*"><img class="preview-img" id="bfPreview" alt=""></div>
         <div class="field"><label>Body *</label><textarea id="bfBody" style="min-height:160px" placeholder="Write your post…"></textarea></div>
         <div style="display:flex;gap:10px;margin-top:6px">
@@ -248,6 +249,23 @@
       <div id="videoList"></div>
     </div>
 
+    <!-- PALMISTRY -->
+    <div class="pane" id="pane-palmistry">
+      <div class="pane-head"><h2>Palmistry</h2><button class="btn btn-brand btn-sm" id="addPalmBtn" style="width:auto">+ Add Entry</button></div>
+      <div class="card hidden-form" id="palmFormCard">
+        <h3 id="pmTitle">Add Palmistry Entry</h3>
+        <input type="hidden" id="pmId">
+        <div class="field"><label>Title *</label><input id="pmName" placeholder="e.g. The Heart Line — what it says about you"></div>
+        <div class="field"><label>Images <small style="font-weight:400;color:#7d7466">(one or more — you can select several at once)</small></label><input id="pmImage" type="file" accept="image/*" multiple><div class="thumbs" id="pmThumbs"></div></div>
+        <div class="field full"><label>Description / content *</label><textarea id="pmBody" style="min-height:160px" placeholder="Write about this palmistry topic — the lines, the mounts, the signs…"></textarea></div>
+        <div style="display:flex;gap:10px;margin-top:6px">
+          <button class="btn btn-brand btn-sm" id="pmSave" style="width:auto">Save Entry</button>
+          <button class="btn btn-ghost btn-sm" id="pmCancel">Cancel</button>
+        </div>
+      </div>
+      <p class="muted" style="margin-bottom:14px">Palmistry is its own section now — entries published here appear only on the Palmistry page, not in Books or Blog.</p>
+      <div id="palmList"></div>
+    </div>
 
     <!-- SUBMISSIONS -->
     <div class="pane" id="pane-submissions">
@@ -416,14 +434,15 @@ function catLabel(id){
   return c.parentId && catMap()[c.parentId] ? catMap()[c.parentId].name + " › " + c.name : c.name;
 }
 async function refreshAll(){
-  const [cS,pS,sS,bS,qS,vS,subS] = await Promise.all([
+  const [cS,pS,sS,bS,qS,vS,subS,pmS] = await Promise.all([
     getDocs(query(collection(db,"categories"), orderBy("order"))),
     getDocs(query(collection(db,"products"), orderBy("createdAt","desc"))),
     getDoc(doc(db,"siteContent","main")),
     getDocs(query(collection(db,"posts"), orderBy("createdAt","desc"))),
     getDocs(query(collection(db,"quotations"), orderBy("createdAt","desc"))),
     getDocs(query(collection(db,"videos"), orderBy("createdAt","desc"))),
-    getDocs(query(collection(db,"submissions"), orderBy("createdAt","desc"))).catch(()=>({docs:[]}))
+    getDocs(query(collection(db,"submissions"), orderBy("createdAt","desc"))).catch(()=>({docs:[]})),
+    getDocs(query(collection(db,"palmistry"), orderBy("createdAt","desc"))).catch(()=>({docs:[]}))
   ]);
   categories = cS.docs.map(d=>({id:d.id,...d.data()}));
   products = pS.docs.map(d=>({id:d.id,...d.data()}));
@@ -432,7 +451,8 @@ async function refreshAll(){
   window._videos = vS.docs.map(d=>({id:d.id,...d.data()}));
   siteDoc = sS.exists() ? sS.data() : {};
   window._submissions = subS.docs.map(d=>({id:d.id,...d.data()}));
-  renderProducts(); renderCats(); renderContent(); renderPosts(); renderQuotations(); renderVideos(); renderSubmissions();
+  window._palmistry = pmS.docs.map(d=>({id:d.id,...d.data()}));
+  renderProducts(); renderCats(); renderContent(); renderPosts(); renderQuotations(); renderVideos(); renderSubmissions(); renderPalmistry();
 }
 // Product/blog photos upload to ImgBB (free image hosting) — Firebase Storage
 // needs a paid plan, so uploads go here instead. Key is a public client key.
@@ -460,14 +480,16 @@ async function removeImage(path){ /* ImgBB has no key-based delete; old images s
 
 /* ---------------- products ---------------- */
 function fillCatSelect(sel, includeEmpty){
-  const ps = categories.filter(c=>!c.parentId).sort((a,b)=>(a.order||0)-(b.order||0));
+  /* Palmistry is its own section now — it is not offered as a book category */
+  const notPalm = c => String(c.name || "").trim().toLowerCase() !== "palmistry";
+  const ps = categories.filter(c=>!c.parentId && notPalm(c)).sort((a,b)=>(a.order||0)-(b.order||0));
   let h = includeEmpty ? "" : "";
   ps.forEach(p=>{
     h += `<option value="${p.id}">${esc(p.name)}</option>`;
-    categories.filter(c=>c.parentId===p.id).sort((a,b)=>(a.order||0)-(b.order||0))
+    categories.filter(c=>c.parentId===p.id && notPalm(c)).sort((a,b)=>(a.order||0)-(b.order||0))
       .forEach(k=>{ h += `<option value="${k.id}">— ${esc(k.name)}</option>`; });
   });
-  const orphans = categories.filter(c=>c.parentId && !catMap()[c.parentId]);
+  const orphans = categories.filter(c=>c.parentId && !catMap()[c.parentId] && notPalm(c));
   orphans.forEach(c=>{ h += `<option value="${c.id}">${esc(c.name)}</option>`; });
   sel.innerHTML = h || `<option value="">(create a category first)</option>`;
 }
@@ -711,7 +733,9 @@ $("bfSave").onclick=async()=>{
     const f=$("bfImage").files[0];
     if(f){ if(old?.imagePath) await removeImage(old.imagePath);
       const up=await uploadImage(f,"blog-images"); imageUrl=up.url; imagePath=up.path; }
-    const data={title, body, tag:$("bfTag").value.trim(), imageUrl, imagePath, createdAt: old?.createdAt || serverTimestamp()};
+    let tag=$("bfTag").value.trim();
+    if(tag.toLowerCase()==="palmistry") tag=""; /* Palmistry is its own section now — it has no tag here */
+    const data={title, body, tag, imageUrl, imagePath, createdAt: old?.createdAt || serverTimestamp()};
     if(id) await updateDoc(doc(db,"posts",id), data);
     else await addDoc(collection(db,"posts"), data);
     $("postFormCard").style.display="none"; await refreshAll();
@@ -818,6 +842,77 @@ async function delVideo(id){
   catch(e){ alert("Delete failed: "+e.message); }
 }
 
+/* ---------------- palmistry (its own section) ---------------- */
+let pmKept = [];     // existing image URLs kept
+let pmNewFiles = []; // newly selected File objects
+function renderPmThumbs(){
+  const w = $("pmThumbs");
+  w.innerHTML = "";
+  pmKept.forEach((u,i)=>{
+    const d = document.createElement("div"); d.className="thumb";
+    d.innerHTML = `<img src="${esc(u)}" alt=""><button data-k="${i}" aria-label="Remove photo">×</button>`;
+    d.querySelector("button").onclick = ()=>{ pmKept.splice(i,1); renderPmThumbs(); };
+    w.appendChild(d);
+  });
+  pmNewFiles.forEach((f,i)=>{
+    const url = URL.createObjectURL(f);
+    const d = document.createElement("div"); d.className="thumb";
+    d.innerHTML = `<img src="${url}" alt=""><button data-n="${i}" aria-label="Remove photo">×</button>`;
+    d.querySelector("button").onclick = ()=>{ URL.revokeObjectURL(url); pmNewFiles.splice(i,1); renderPmThumbs(); };
+    w.appendChild(d);
+  });
+}
+function renderPalmistry(){
+  const w=$("palmList"), items=window._palmistry||[];
+  if(!items.length){ w.innerHTML=`<div class="card"><p class="muted">No palmistry entries yet. Publish the first one with <b>+ Add Entry</b>.</p></div>`; return; }
+  w.innerHTML=items.map(e=>`
+    <div class="list-item">
+      ${(e.images&&e.images.length)?`<img src="${esc(e.images[0])}" alt="">`:`<div class="ph">Palmistry</div>`}
+      <div class="info"><b>${esc(e.title)}</b><small>${esc((e.body||"").slice(0,80))}…${(e.images&&e.images.length>1)?` · ${e.images.length} photos`:""}</small></div>
+      <div class="actions">
+        <button class="btn btn-ghost btn-sm" data-edit-pm="${e.id}">Edit</button>
+        <button class="btn btn-danger btn-sm" data-del-pm="${e.id}">Delete</button>
+      </div>
+    </div>`).join("");
+  w.querySelectorAll("[data-edit-pm]").forEach(b=>b.onclick=()=>editPalm(b.dataset.editPm));
+  w.querySelectorAll("[data-del-pm]").forEach(b=>b.onclick=()=>delPalm(b.dataset.delPm));
+}
+function resetPalmForm(){
+  $("pmId").value=""; $("pmName").value=""; $("pmBody").value=""; $("pmImage").value="";
+  pmKept=[]; pmNewFiles=[]; renderPmThumbs(); $("pmTitle").textContent="Add Palmistry Entry";
+}
+$("addPalmBtn").onclick=()=>{ resetPalmForm(); $("palmFormCard").style.display="block"; $("pmName").focus(); };
+$("pmCancel").onclick=()=>{ $("palmFormCard").style.display="none"; };
+$("pmImage").onchange=e=>{ pmNewFiles.push(...e.target.files); e.target.value=""; renderPmThumbs(); };
+function editPalm(id){
+  const e=(window._palmistry||[]).find(x=>x.id===id); if(!e) return;
+  resetPalmForm(); $("pmTitle").textContent="Edit Palmistry Entry"; $("pmId").value=id;
+  $("pmName").value=e.title||""; $("pmBody").value=e.body||"";
+  pmKept=(e.images||[]).slice(); renderPmThumbs();
+  $("palmFormCard").style.display="block"; window.scrollTo({top:0,behavior:"smooth"});
+}
+$("pmSave").onclick=async()=>{
+  const title=$("pmName").value.trim(), body=$("pmBody").value.trim();
+  if(!title||!body){ alert("Title and description are required."); return; }
+  const btn=$("pmSave"); btn.disabled=true; btn.textContent="Saving…";
+  try{
+    const id=$("pmId").value||null;
+    const old=id?(window._palmistry||[]).find(x=>x.id===id):null;
+    const images=pmKept.slice();
+    for(const f of pmNewFiles){ const up=await uploadImage(f,"palmistry-images"); images.push(up.url); }
+    const data={title, body, images, createdAt: old?.createdAt || serverTimestamp()};
+    if(id) await updateDoc(doc(db,"palmistry",id), data);
+    else await addDoc(collection(db,"palmistry"), data);
+    $("palmFormCard").style.display="none"; await refreshAll();
+  }catch(e){ alert("Save failed: "+e.message); }
+  btn.disabled=false; btn.textContent="Save Entry";
+};
+async function delPalm(id){
+  if(!confirm("Delete this palmistry entry?")) return;
+  try{ await deleteDoc(doc(db,"palmistry",id)); await refreshAll(); }
+  catch(e){ alert("Delete failed: "+e.message); }
+}
+
 /* ---------------- submissions (public submit -> admin approval) ---------------- */
 function renderSubmissions(){
   const w=$("submissionList"), subs=window._submissions||[];
@@ -871,7 +966,7 @@ async function approveSubmission(id){
       const ref=await addDoc(collection(db,"videos"),{title:s.title,youtubeUrl:finalFile,description:s.description,createdAt:serverTimestamp()});
       publishedId=ref.id; publishedUrl="videos.html";
     } else {
-      const ref=await addDoc(collection(db,"posts"),{title:s.title,body:s.body||s.description,imageUrl:s.coverUrl||"",tag:catName,author:s.author,createdAt:serverTimestamp()});
+      const ref=await addDoc(collection(db,"posts"),{title:s.title,body:s.body||s.description,imageUrl:s.coverUrl||"",tag:(catName&&catName.toLowerCase()!=="palmistry")?catName:"",author:s.author,createdAt:serverTimestamp()});
       publishedId=ref.id; publishedUrl="post.html?id="+ref.id;
     }
     await updateDoc(doc(db,"submissions",id),{status:"approved",adminNote:note,publishedId,publishedUrl,categoryId:catId,categoryName:catName,reviewedAt:serverTimestamp()});
