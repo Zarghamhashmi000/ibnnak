@@ -242,7 +242,11 @@ function renderPageViewer(p, pages){
     const p = { id: snap.id, ...snap.data() };
     document.title = (p.name || "Book") + " — Read Online — Ibnaak";
     document.getElementById("readerTitle").textContent = p.name || "Read Online";
-    /* Books hosted inside Ibnaak: read the site's own file — nothing is fetched from outside */
+    /* Books hosted inside Ibnaak: read the site's own file — nothing is fetched from outside.
+       NOTE: the reader iframes below have NO sandbox attribute on purpose —
+       Chrome's built-in PDF viewer does not load inside a sandboxed iframe
+       (it shows "This page has been blocked by Chrome"). The src is already
+       guarded by safeUrl(), which blocks javascript:/data: URLs — do not re-add it. */
     try{
       const localMap = await (await fetch("books-data.json", {cache:"no-store"})).json();
       const local = localMap && localMap[p.id];
@@ -252,7 +256,7 @@ function renderPageViewer(p, pages){
         root.innerHTML = `
           ${partNav}
           <div class="viewer">
-            <iframe id="bookFrame" src="${esc(safeUrl(local.file))}" title="${esc(p.name)}" loading="lazy" sandbox="allow-scripts allow-same-origin"></iframe>
+            <iframe id="bookFrame" src="${esc(safeUrl(local.file))}" title="${esc(p.name)}" loading="lazy"></iframe>
           </div>
           <p class="open-link">This book lives on Ibnaak. Trouble viewing? <a id="directLink" href="${esc(safeUrl(local.file))}" target="_blank" rel="noopener">Open the book file directly</a>.</p>`;
         if (parts){
@@ -291,7 +295,7 @@ function renderPageViewer(p, pages){
       }
       root.innerHTML = `
           <div class="viewer">
-            <iframe id="bookFrame" src="${esc(safeUrl(p.readUrl))}" title="${esc(p.name)}" loading="lazy" sandbox="allow-scripts allow-same-origin"></iframe>
+            <iframe id="bookFrame" src="${esc(safeUrl(p.readUrl))}" title="${esc(p.name)}" loading="lazy"></iframe>
           </div>
           <p class="open-link">This book is hosted on Ibnaak's file storage. Trouble viewing? <a id="directLink" href="${esc(safeUrl(p.readUrl))}" target="_blank" rel="noopener">Open the book file directly</a>.</p>`;
       return;
