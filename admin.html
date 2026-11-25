@@ -625,10 +625,12 @@ function renderCats(){
       <div class="info"><b>${esc(c.name)}</b>
         <small>${c.parentId&&catMap()[c.parentId] ? "under "+esc(catMap()[c.parentId].name) : '<span class="tag">Parent</span>'} · order ${c.order??0}</small></div>
       <div class="actions">
+        ${!c.parentId?`<button class="btn btn-ghost btn-sm" data-sub-c="${c.id}">+ Sub</button>`:""}
         <button class="btn btn-ghost btn-sm" data-edit-c="${c.id}">Edit</button>
         <button class="btn btn-danger btn-sm" data-del-c="${c.id}">Delete</button>
       </div>
     </div>`).join("");
+  w.querySelectorAll("[data-sub-c]").forEach(b=>b.onclick=()=>addSubCat(b.dataset.subC));
   w.querySelectorAll("[data-edit-c]").forEach(b=>b.onclick=()=>editCat(b.dataset.editC));
   w.querySelectorAll("[data-del-c]").forEach(b=>b.onclick=()=>delCat(b.dataset.delC));
 }
@@ -650,14 +652,24 @@ function editCat(id){
   fillParentSelect($("cfParent"), id); $("cfParent").value=c.parentId||"";
   $("catFormCard").style.display="block";
 }
+/* Open the category form with a parent already chosen — for adding a sub-category */
+function addSubCat(parentId){
+  const p=categories.find(x=>x.id===parentId); if(!p) return;
+  resetCatForm(); $("cfTitle").textContent="Add Sub-category under "+p.name;
+  $("cfParent").value=parentId;
+  $("catFormCard").style.display="block"; $("cfName").focus();
+}
 $("cfSave").onclick=async()=>{
   const name=$("cfName").value.trim(); if(!name){ alert("Category name is required."); return; }
   const data={name, parentId:$("cfParent").value||null, order:Number($("cfOrder").value)||0};
   try{
     const id=$("cfId").value;
+    let newId=null;
     if(id) await updateDoc(doc(db,"categories",id), data);
-    else await addDoc(collection(db,"categories"), data);
+    else newId=(await addDoc(collection(db,"categories"), data)).id;
     $("catFormCard").style.display="none"; await refreshAll();
+    /* Offer a sub-category right after a new top-level category is added */
+    if(newId && !data.parentId && confirm(`Add a sub-category under "${name}"?`)) addSubCat(newId);
   }catch(e){ alert("Save failed: "+e.message); }
 };
 async function delCat(id){
