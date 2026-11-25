@@ -285,14 +285,60 @@ let categories=[], products=[], siteDoc={};
 /* Cloudflare R2 file gateway (Worker) — direct PDF uploads go here. */
 const WORKER_URL = "https://ibnnak-files.zarghamhaider722.workers.dev";
 function slugify(s){ return String(s||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,80) || "book"; }
-async function uploadPdfToR2(file, key){
+const R2_MAX_PDF = 100 * 1024 * 1024; // must match the Worker's limit
+function uploadOnceXHR(file, key, token, onProgress){
+  return new Promise((resolve, reject)=>{
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", WORKER_URL + "/upload?key=" + encodeURIComponent(key));
+    xhr.setRequestHeader("Authorization", "Bearer " + token);
+    xhr.setRequestHeader("Content-Type", file.type || "application/pdf");
+    xhr.upload.onprogress = e=>{ if(e.lengthComputable && onProgress) onProgress(Math.round(e.loaded * 100 / e.total)); };
+    xhr.onload = ()=>{
+      let out = {}; try{ out = JSON.parse(xhr.responseText || "{}"); }catch(_){}
+      if(xhr.status >= 200 && xhr.status < 300) resolve(out);
+      else reject(new Error((out && out.error) || ("Upload failed (" + xhr.status + ")")));
+    };
+    xhr.onerror = ()=>reject(new Error("Network error — check your connection and try again."));
+    xhr.ontimeout = ()=>reject(new Error("Upload timed out — try again."));
+    xhr.send(file);
+  });
+}
+/* Upload with a live progress %, one automatic retry on network/5xx failure,
+   and a client-side type/size check so a bad file never starts uploading.
+   A 200 reply from the Worker means the file is stored in R2. */
+async function uploadPdfToR2(file, key, onProgress){
+  if(file.type && file.type !== "application/pdf") throw new Error("The file must be a PDF.");
+  if(file.size > R2_MAX_PDF) throw new Error("PDF is too large (max 100 MB).");
+  if(!file.size) throw new Error("That file looks empty.");
   const user = auth && auth.currentUser;
   if(!user) throw new Error("Sign in as admin first.");
   const token = await user.getIdToken();
-  const res = await fetch(WORKER_URL + "/upload?key=" + encodeURIComponent(key), { method:"POST", headers:{ Authorization:"Bearer "+token, "Content-Type": file.type || "application/pdf" }, body: file });
+  let lastErr = null;
+  for(let attempt = 1; attempt <= 2; attempt++){
+    try{ return await uploadOnceXHR(file, key, token, onProgress); }
+    catch(e){
+      lastErr = e;
+      const retryable = /Network error|timed out|\(5\d\d\)/.test(e.message);
+      if(!retryable || attempt === 2) throw e;
+      if(onProgress) onProgress(0);
+    }
+  }
+  throw lastErr;
+}
+/* Delete a pending/ file from R2 (admin only). Returns true when the file is
+   gone, false when there was nothing to delete. Throws when the Worker does
+   not have the delete route yet, or the admin is not allowed. */
+async function deleteFromR2(key){
+  if(!key || !key.startsWith("pending/")) return false;
+  const user = auth && auth.currentUser;
+  if(!user) throw new Error("Sign in as admin first.");
+  const token = await user.getIdToken();
+  const res = await fetch(WORKER_URL + "/delete/" + key, { method:"DELETE", headers:{ Authorization:"Bearer "+token } });
   const out = await res.json().catch(()=>({}));
-  if(!res.ok) throw new Error((out && out.error) || ("Upload failed ("+res.status+")"));
-  return out;
+  if(res.status === 404 && out && out.error === "Not found") throw new Error("DELETE_ROUTE_MISSING");
+  if(res.status === 404) return false; // already gone
+  if(!res.ok) throw new Error((out && out.error) || ("Delete failed ("+res.status+")"));
+  return true;
 }
 let pfCloudflareKey = "";
 
@@ -468,16 +514,17 @@ $("pfImage").onchange = e=>{
 };
 $("pfPdf").onchange = async e=>{
   const f = e.target.files && e.target.files[0]; if(!f) return;
-  const st = $("pfPdfStatus"); st.textContent = "Uploading “"+f.name+"” to R2…";
+  const st = $("pfPdfStatus"); const input = $("pfPdf"); input.disabled = true;
+  st.textContent = "Uploading “"+f.name+"” to R2…";
   try{
     const title = $("pfName").value.trim() || f.name.replace(/\.pdf$/i,"");
     const key = "books/" + slugify(title) + ".pdf";
-    await uploadPdfToR2(f, key);
+    await uploadPdfToR2(f, key, pct=>{ st.textContent = "Uploading “"+f.name+"” to R2… " + pct + "%"; });
     pfCloudflareKey = key; $("pfCloudflareKey").value = key;
     $("pfDownloadUrl").value = WORKER_URL + "/download/" + key;
     st.textContent = "Uploaded ✓ " + key + " — read & download links now point at R2.";
   }catch(err){ st.textContent = "Upload failed: " + err.message; }
-  $("pfPdf").value="";
+  input.disabled = false; input.value="";
 };
 function editProduct(id){
   const p = products.find(x=>x.id===id); if(!p) return;
@@ -826,6 +873,22 @@ async function rejectSubmission(id){
   if(!note && !confirm("Reject without a message? The submitter will only see 'Rejected'.")) return;
   try{
     await updateDoc(doc(db,"submissions",id),{status:"rejected",adminNote:note,reviewedAt:serverTimestamp()});
+    /* Delete the submission's file from storage so nothing is left behind.
+       The rejection record stays, so the submitter still sees the message. */
+    let key = s.cloudflareKey || "";
+    if(!key && s.fileUrl && s.fileUrl.includes("/read/pending/")) key = s.fileUrl.split("/read/")[1].split("?")[0];
+    let fileMsg = "";
+    if(key && key.startsWith("pending/")){
+      try{
+        const gone = await deleteFromR2(key);
+        fileMsg = gone ? " The uploaded file was deleted from storage." : " The uploaded file was already gone.";
+      }catch(delErr){
+        fileMsg = delErr.message === "DELETE_ROUTE_MISSING"
+          ? " Note: the file could not be deleted yet — the Worker update is not deployed. Delete " + key + " in the R2 console if needed."
+          : " Note: the file could not be deleted (" + delErr.message + ").";
+      }
+    }
+    if(fileMsg) alert("Rejected." + fileMsg);
     await refreshAll();
   }catch(e){ alert("Reject failed: "+e.message); }
 }
