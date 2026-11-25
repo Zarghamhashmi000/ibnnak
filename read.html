@@ -164,6 +164,17 @@ import { getFirestore, getDoc, doc } from "firebase/firestore";
 
 const root = document.getElementById("readerRoot");
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+/* URL allowlist for links and frames: only https: and site-relative paths.
+   esc() stops markup injection but NOT javascript:/data: URLs — those would
+   run on click (or load in a frame), so anything else becomes "#". */
+function safeUrl(u){
+  const s = String(u || "").trim();
+  if(!s || s.startsWith("//")) return "#";
+  if(s.startsWith("https://")) return s;
+  if(s.startsWith("/")) return s;
+  if(/^[a-z][a-z0-9+.-]*:/i.test(s)) return "#";
+  return s; /* site-relative path, e.g. book.html?id=… or books/….pdf */
+}
 
 function showState(title, text, bookId){
   const back = bookId ? `<p style="margin-top:14px"><a href="book.html?id=${encodeURIComponent(bookId)}">← Back to book</a></p>` : "";
@@ -241,9 +252,9 @@ function renderPageViewer(p, pages){
         root.innerHTML = `
           ${partNav}
           <div class="viewer">
-            <iframe id="bookFrame" src="${esc(local.file)}" title="${esc(p.name)}" loading="lazy"></iframe>
+            <iframe id="bookFrame" src="${esc(safeUrl(local.file))}" title="${esc(p.name)}" loading="lazy" sandbox="allow-scripts allow-same-origin"></iframe>
           </div>
-          <p class="open-link">This book lives on Ibnaak. Trouble viewing? <a id="directLink" href="${esc(local.file)}" target="_blank" rel="noopener">Open the book file directly</a>.</p>`;
+          <p class="open-link">This book lives on Ibnaak. Trouble viewing? <a id="directLink" href="${esc(safeUrl(local.file))}" target="_blank" rel="noopener">Open the book file directly</a>.</p>`;
         if (parts){
           const frame = document.getElementById("bookFrame");
           const direct = document.getElementById("directLink");
@@ -274,11 +285,15 @@ function renderPageViewer(p, pages){
         showState("Book file not available", "This book's file is missing from storage — please check back soon, or tell the admin.", id);
         return;
       }
+      if(safeUrl(p.readUrl) === "#"){
+        showState("Book file not available", "This book's file link is not valid — please tell the admin.", id);
+        return;
+      }
       root.innerHTML = `
           <div class="viewer">
-            <iframe id="bookFrame" src="${esc(p.readUrl)}" title="${esc(p.name)}" loading="lazy"></iframe>
+            <iframe id="bookFrame" src="${esc(safeUrl(p.readUrl))}" title="${esc(p.name)}" loading="lazy" sandbox="allow-scripts allow-same-origin"></iframe>
           </div>
-          <p class="open-link">This book is hosted on Ibnaak's file storage. Trouble viewing? <a id="directLink" href="${esc(p.readUrl)}" target="_blank" rel="noopener">Open the book file directly</a>.</p>`;
+          <p class="open-link">This book is hosted on Ibnaak's file storage. Trouble viewing? <a id="directLink" href="${esc(safeUrl(p.readUrl))}" target="_blank" rel="noopener">Open the book file directly</a>.</p>`;
       return;
     }
     const pages = (p.images && p.images.length ? p.images : (p.imageUrl ? [p.imageUrl] : []));
