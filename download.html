@@ -202,7 +202,16 @@ function showState(title, text){
       if (local && local.file) downloadUrl = local.file;
       if (local && local.parts && local.parts.length > 1) localParts = local.parts;
     }catch(e){ /* keep the stored link */ }
-    const fileUrls = localParts ? localParts : (downloadUrl ? [downloadUrl] : []);
+    let fileUrls = localParts ? localParts : (downloadUrl ? [downloadUrl] : []);
+    /* If the file lives on the Worker's storage, check it is really there —
+       a missing file shows "not available" instead of a dead button. A failed
+       check never hides the button: it is shown anyway. */
+    if(!localParts && downloadUrl && downloadUrl.includes("workers.dev/")){
+      try{
+        const chk = await fetch(downloadUrl, { headers:{ Range:"bytes=0-0" } });
+        if(!chk.ok) fileUrls = [];
+      }catch(_){ /* keep the button */ }
+    }
     const dlLabel = i => localParts ? "Download Part " + (i + 1) + " (PDF)" : (isFree ? "Download this book (PDF)" : "Download your book (PDF)");
     const dlButtons = fileUrls.map((u, i) => `<a class="btn btn-dl" href="${esc(u)}" target="_blank" rel="noopener"${i ? ' style="margin-top:10px"' : ''}>${dlLabel(i)}</a>`).join("");
 
