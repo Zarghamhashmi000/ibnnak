@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Palmistry — Ibnaak</title>
-<meta name="description" content="Ibnaak — a free online library. Palmistry books to read online, free, plus articles on the ancient art of reading the lines of the hand.">
+<meta name="description" content="Ibnaak — a free online library. Palmistry — notes on the ancient art of reading the lines of the hand, published by the library.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -54,47 +54,21 @@
   .sec-head{text-align:center;margin-bottom:30px}
   .sec-head h2{font-size:1.9rem;color:var(--brand);margin-bottom:8px}
   .sec-head p{color:var(--muted);max-width:560px;margin:0 auto}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:22px}
-  .card{background:var(--card);border:1px solid var(--line);
-    border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);position:relative;cursor:pointer;
-    transition:transform .18s ease}
-  .card:hover{transform:translateY(-4px)}
-  .card .ph{aspect-ratio:3/4;background:linear-gradient(135deg,#eee3c8,#dfcfa6);
-    display:flex;align-items:center;justify-content:center;color:#8a7340;
-    font-family:'Fraunces',Georgia,serif;font-size:1.1rem;text-align:center;padding:12px}
-  [data-theme="dark"] .card .ph{background:linear-gradient(135deg,#263020,#1c241b);color:#9a8f6d}
-  .card img{width:100%;aspect-ratio:3/4;object-fit:cover}
-  .card .body{padding:16px}
-  .card .cat{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:600}
-  .card h3{font-size:1.08rem;margin:6px 0 4px;color:var(--ink)}
-  .card .author{font-size:.85rem;color:var(--muted);font-style:italic;margin-bottom:2px}
-  .wish-heart{position:absolute;top:10px;right:10px;width:36px;height:36px;border-radius:50%;border:0;
-    background:rgba(255,255,255,.94);color:#7d7466;cursor:pointer;z-index:2;
-    display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.16);
-    transition:transform .15s ease,color .15s ease}
-  .wish-heart:hover{transform:scale(1.1)}
-  .wish-heart svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2}
-  .wish-heart.on{color:#e0245e}
-  .wish-heart.on svg{fill:#e0245e;stroke:#e0245e}
-  [data-theme="dark"] .wish-heart{background:rgba(34,26,23,.94)}
-  .post-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:22px}
-  .post{display:block;text-decoration:none;background:var(--card);border:1px solid var(--line);
-    border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);transition:transform .18s ease}
-  .post:hover{transform:translateY(-3px)}
-  .post img{width:100%;height:180px;object-fit:cover}
-  .post .ph{height:140px;background:linear-gradient(135deg,#efe2c2,#e0cd9c);
-    display:flex;align-items:center;justify-content:center;color:#96762f;
-    font-family:'Fraunces',Georgia,serif}
-  [data-theme="dark"] .post .ph{background:linear-gradient(135deg,#2e2c16,#26230f);color:#b3924a}
-  .post .body{padding:20px}
-  .post .pdate{font-size:.76rem;color:var(--gold);font-weight:600;letter-spacing:.06em;
-    text-transform:uppercase;margin-bottom:6px}
-  .post h3{font-size:1.15rem;color:var(--brand);margin-bottom:8px}
-  .post p{font-size:.9rem;color:var(--muted);display:-webkit-box;-webkit-line-clamp:3;
-    -webkit-box-orient:vertical;overflow:hidden}
   .state{background:var(--card);border:1.5px dashed var(--line);border-radius:var(--radius);
     padding:44px 24px;text-align:center;color:var(--muted);grid-column:1/-1}
   .state h3{color:var(--brand);font-size:1.3rem;margin-bottom:8px}
+  .entry{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);overflow:hidden;margin-bottom:28px}
+  .entry .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;padding:16px 16px 0}
+  .entry .gallery a{display:block;border-radius:10px;overflow:hidden}
+  .entry .gallery img{width:100%;height:220px;object-fit:cover}
+  .entry .gallery.single{grid-template-columns:1fr}
+  .entry .gallery.single img{height:auto;max-height:460px}
+  .entry .entry-body{padding:22px 24px 26px}
+  .entry h3{font-size:1.5rem;color:var(--brand);margin-bottom:4px}
+  .entry .pdate{font-size:.76rem;color:var(--gold);font-weight:600;letter-spacing:.06em;
+    text-transform:uppercase;margin-bottom:12px}
+  .entry .entry-body p{margin-bottom:12px;color:var(--ink)}
   footer{background:#16241b;color:#b3ab96;text-align:center;padding:34px 20px;font-size:.88rem}
   footer .brand{color:#ecdfba;font-size:1.2rem}
   footer nav{margin:14px 0;display:flex;gap:20px;justify-content:center;flex-wrap:wrap}
@@ -103,7 +77,7 @@
   button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
   @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
   @media(max-width:900px){.nav-links{display:none}}
-  @media(max-width:480px){.grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}}
+  @media(max-width:480px){.entry .entry-body{padding:18px 16px 20px}}
   header .wrap-wide.nav, header .wrap.nav{background:var(--header-bg) !important}
 </style>
 <link rel="stylesheet" href="assets/library-theme.css?v=3">
@@ -142,21 +116,11 @@
 
     <section>
       <div class="sec-head">
-        <h2>Palmistry Books</h2>
-        <p>From the library's Palmistry shelf — tap a book to open it and read online, free.</p>
+        <h2>Palmistry</h2>
+        <p>Notes on the ancient art of reading the hand — published here by the library.</p>
       </div>
-      <div class="grid" id="palmBooks">
-        <div class="state"><h3>Loading…</h3><p>Fetching the Palmistry shelf.</p></div>
-      </div>
-    </section>
-
-    <section>
-      <div class="sec-head">
-        <h2>Palmistry Articles</h2>
-        <p>Introductions and notes on reading hands. Articles open on their own page, in a new tab.</p>
-      </div>
-      <div class="post-grid" id="palmPosts">
-        <div class="state"><h3>Loading…</h3><p>Fetching Palmistry articles.</p></div>
+      <div id="palmEntries">
+        <div class="state"><h3>Loading…</h3><p>Fetching Palmistry entries.</p></div>
       </div>
     </section>
   </div>
@@ -203,14 +167,21 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, getDocs, getDoc, doc, query, orderBy } from "firebase/firestore";
 
-const DEFAULT_INTRO = "Palmistry — the reading of the hand — is one of the oldest arts in the world. For centuries, readers across Arabia, Persia, India and Europe have studied the map written in every palm: the life line, the heart line, the head line and the fate line, each with its own story to tell.\n\nOn this page you will find our palmistry books and articles: gentle introductions for the curious, and classic works for the serious student. Browse the shelf, learn the lines, and begin reading hands — starting with your own.\n\n(Shared for reflection and entertainment.)";
+/* Palmistry is its own section now: entries live in the `palmistry`
+   collection (title, body, images[]) — not in Books or Blog. */
+const DEFAULT_INTRO = "Palmistry — the reading of the hand — is one of the oldest arts in the world. For centuries, readers across Arabia, Persia, India and Europe have studied the map written in every palm: the life line, the heart line, the head line and the fate line, each with its own story to tell.\n\nOn this page you will find our palmistry notes: gentle introductions for the curious, and classic guidance for the serious student. Learn the lines, and begin reading hands — starting with your own.\n\n(Shared for reflection and entertainment.)";
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const HEART_SVG = '<svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>';
-let wish = [];
-try { wish = JSON.parse(localStorage.getItem("abk_wish") || "[]"); } catch(e){ wish = []; }
-function saveWish(){ try{ localStorage.setItem("abk_wish", JSON.stringify(wish)); }catch(e){} }
-const booksEl = document.getElementById("palmBooks");
-const postsEl = document.getElementById("palmPosts");
+/* URL allowlist for links and images: only https: and site-relative paths.
+   esc() stops markup injection but NOT javascript:/data: URLs. */
+function safeUrl(u){
+  const s = String(u || "").trim();
+  if(!s || s.startsWith("//")) return "#";
+  if(s.startsWith("https://")) return s;
+  if(s.startsWith("/")) return s;
+  if(/^[a-z][a-z0-9+.-]*:/i.test(s)) return "#";
+  return s; /* site-relative path */
+}
+const entriesEl = document.getElementById("palmEntries");
 function state(el, title, text){
   el.innerHTML = `<div class="state"><h3>${esc(title)}</h3><p>${esc(text)}</p></div>`;
 }
@@ -218,76 +189,42 @@ document.getElementById("palmIntro").textContent = DEFAULT_INTRO;
 
 (async function(){
   if (typeof FIREBASE_CONFIGURED === "undefined" || !FIREBASE_CONFIGURED){
-    state(booksEl, "Palmistry Books Coming Soon", "New books are being added to the shelves — check back soon.");
-    state(postsEl, "Palmistry Articles Coming Soon", "Articles on palmistry will appear here.");
+    state(entriesEl, "Palmistry Coming Soon", "The first palmistry entries are being added — check back soon.");
     return;
   }
   try{
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app, "default");
-    const [cSnap, pSnap, sSnap, bSnap] = await Promise.all([
-      getDocs(query(collection(db, "categories"), orderBy("order"))),
-      getDocs(query(collection(db, "products"), orderBy("createdAt", "desc"))),
-      getDoc(doc(db, "siteContent", "main")),
-      getDocs(query(collection(db, "posts"), orderBy("createdAt", "desc")))
+    const [pSnap, sSnap] = await Promise.all([
+      getDocs(query(collection(db, "palmistry"), orderBy("createdAt", "desc"))),
+      getDoc(doc(db, "siteContent", "main"))
     ]);
-    const categories = cSnap.docs.map(d => ({id: d.id, ...d.data()}));
-    const products = pSnap.docs.map(d => ({id: d.id, ...d.data()}));
-    const posts = bSnap.docs.map(d => ({id: d.id, ...d.data()}));
+    const entries = pSnap.docs.map(d => ({id: d.id, ...d.data()}));
     if (sSnap.exists() && sSnap.data().palmistryIntro)
       document.getElementById("palmIntro").textContent = sSnap.data().palmistryIntro;
-
-    const palmIds = new Set(categories.filter(c => String(c.name || "").trim().toLowerCase() === "palmistry").map(c => c.id));
-    categories.forEach(c => { if (c.parentId && palmIds.has(c.parentId)) palmIds.add(c.id); });
-    const palmBooks = products.filter(p => palmIds.has(p.categoryId));
-    if (!palmBooks.length){
-      state(booksEl, "The Palmistry Shelf Is Being Stocked", "New books are being added to the shelves — check back soon.");
-    } else {
-      booksEl.innerHTML = palmBooks.map(p => {
-        const thumb = (p.images && p.images.length ? p.images[0] : (p.imageUrl || ""));
-        const wished = wish.includes(p.id);
-        return `
-        <div class="card" data-id="${esc(p.id)}">
-          <button class="wish-heart${wished ? " on" : ""}" data-wish="${esc(p.id)}" aria-label="Save book">${HEART_SVG}</button>
-          ${thumb ? `<img src="${esc(thumb)}" alt="${esc(p.name)}" loading="lazy" decoding="async">` : `<div class="ph">Ibnaak</div>`}
-          <div class="body">
-            <div class="cat">Palmistry</div>
-            <h3>${esc(p.name)}</h3>
-            ${p.author ? `<div class="author">by ${esc(p.author)}</div>` : ""}
-          </div>
-        </div>`;
-      }).join("");
-      booksEl.querySelectorAll("[data-wish]").forEach(b => b.addEventListener("click", e => {
-        e.stopPropagation();
-        const id = b.dataset.wish;
-        wish = wish.includes(id) ? wish.filter(x => x !== id) : [...wish, id];
-        saveWish();
-        b.classList.toggle("on", wish.includes(id));
-      }));
-      booksEl.querySelectorAll(".card[data-id]").forEach(c => c.addEventListener("click", () => {
-        location.href = "book.html?id=" + encodeURIComponent(c.dataset.id);
-      }));
+    if (!entries.length){
+      state(entriesEl, "Palmistry Coming Soon", "The first palmistry entries are being added — check back soon.");
+      return;
     }
-
-    const palmPosts = posts.filter(p => String(p.tag || "").trim().toLowerCase() === "palmistry");
-    if (!palmPosts.length){
-      state(postsEl, "Palmistry Articles Coming Soon", "Articles tagged “Palmistry” in the dashboard will appear here.");
-    } else {
-      postsEl.innerHTML = palmPosts.map(p => {
-        let date = "";
-        try{ date = p.createdAt && p.createdAt.toDate
-          ? p.createdAt.toDate().toLocaleDateString("en-GB", {day:"numeric", month:"long", year:"numeric"}) : ""; }catch(e){}
-        return `
-        <a class="post" href="post.html?id=${encodeURIComponent(p.id)}" target="_blank" rel="noopener">
-          ${p.imageUrl ? `<img src="${esc(p.imageUrl)}" alt="${esc(p.title)}" loading="lazy" decoding="async">` : `<div class="ph">Ibnaak</div>`}
-          <div class="body">${date ? `<div class="pdate">${esc(date)}</div>` : ""}<h3>${esc(p.title)}</h3><p>${esc((p.body || "").slice(0, 140))}…</p></div>
-        </a>`;
-      }).join("");
-    }
+    entriesEl.innerHTML = entries.map(e => {
+      const imgs = (e.images || []).filter(u => safeUrl(u) !== "#");
+      let date = "";
+      try{ date = e.createdAt && e.createdAt.toDate
+        ? e.createdAt.toDate().toLocaleDateString("en-GB", {day:"numeric", month:"long", year:"numeric"}) : ""; }catch(_){}
+      const paras = String(e.body || "").split(/\n\s*\n|\n/).map(s => s.trim()).filter(Boolean);
+      return `
+      <article class="entry">
+        ${imgs.length ? `<div class="gallery${imgs.length === 1 ? " single" : ""}">${imgs.map(u => `<a href="${esc(u)}" target="_blank" rel="noopener"><img src="${esc(u)}" alt="${esc(e.title || "")}" loading="lazy" decoding="async"></a>`).join("")}</div>` : ""}
+        <div class="entry-body">
+          <h3>${esc(e.title || "")}</h3>
+          ${date ? `<div class="pdate">${esc(date)}</div>` : ""}
+          ${paras.map(t => `<p>${esc(t)}</p>`).join("")}
+        </div>
+      </article>`;
+    }).join("");
   }catch(e){
     console.warn("[Ibnaak] Could not load Palmistry page:", e.message);
-    state(booksEl, "Could not load the Palmistry shelf", "Please check your connection and try again.");
-    state(postsEl, "Could not load articles", "Please check your connection and try again.");
+    state(entriesEl, "Could not load Palmistry", "Please check your connection and try again.");
   }
 })();
 </script>
