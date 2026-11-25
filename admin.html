@@ -220,8 +220,11 @@
       <div class="card hidden-form" id="quoteFormCard">
         <h3 id="qfTitle">Add Quotation</h3>
         <input type="hidden" id="qfId">
+        <div class="field"><label>Title <small class="muted">(optional)</small></label><input id="qfName" placeholder="e.g. On patience"></div>
+        <div class="field"><label>Category <small class="muted">(optional)</small></label><select id="qfCategory"></select></div>
         <div class="field"><label>Quotation text *</label><textarea id="qfText" style="min-height:110px" placeholder="The quotation itself…"></textarea></div>
         <div class="field"><label>Author / source</label><input id="qfAuthor" placeholder="e.g. Rumi"></div>
+        <div class="field"><label>Image <small class="muted">(optional)</small></label><input id="qfImage" type="file" accept="image/*"><img class="preview-img" id="qfPreview" alt=""></div>
         <div style="display:flex;gap:10px;margin-top:6px">
           <button class="btn btn-brand btn-sm" id="qfSave" style="width:auto">Save Quotation</button>
           <button class="btn btn-ghost btn-sm" id="qfCancel">Cancel</button>
@@ -754,7 +757,8 @@ function renderQuotations(){
   if(!qs.length){ w.innerHTML=`<div class="card"><p class="muted">No quotations yet. Add the first one with <b>+ Add Quotation</b>.</p></div>`; return; }
   w.innerHTML=qs.map(q=>`
     <div class="list-item">
-      <div class="info"><b style="font-weight:500;font-style:italic">\u201C${esc((q.text||"").slice(0,110))}${(q.text||"").length>110?"\u2026":""}\u201D</b><small>${esc(q.author||"")}</small></div>
+      ${q.imageUrl?`<img src="${esc(q.imageUrl)}" alt="">`:`<div class="ph">Quote</div>`}
+      <div class="info"><b style="font-weight:500;font-style:italic">\u201C${esc((q.text||"").slice(0,110))}${(q.text||"").length>110?"\u2026":""}\u201D</b><small>${q.title?esc(q.title)+" · ":""}${esc(q.author||"")}${q.categoryId&&catMap()[q.categoryId]?` · ${esc(catMap()[q.categoryId].name)}`:""}</small></div>
       <div class="actions">
         <button class="btn btn-ghost btn-sm" data-edit-q="${q.id}">Edit</button>
         <button class="btn btn-danger btn-sm" data-del-q="${q.id}">Delete</button>
@@ -764,15 +768,21 @@ function renderQuotations(){
   w.querySelectorAll("[data-del-q]").forEach(b=>b.onclick=()=>delQuote(b.dataset.delQ));
 }
 function resetQuoteForm(){
-  $("qfId").value=""; $("qfText").value=""; $("qfAuthor").value="";
+  $("qfId").value=""; $("qfName").value=""; $("qfText").value=""; $("qfAuthor").value=""; $("qfImage").value="";
+  $("qfPreview").style.display="none";
+  fillCatSelect($("qfCategory"));
+  $("qfCategory").innerHTML=`<option value="">(No category)</option>`+$("qfCategory").innerHTML;
   $("qfTitle").textContent="Add Quotation";
 }
 $("addQuoteBtn").onclick=()=>{ resetQuoteForm(); $("quoteFormCard").style.display="block"; $("qfText").focus(); };
 $("qfCancel").onclick=()=>{ $("quoteFormCard").style.display="none"; };
+$("qfImage").onchange=e=>{ const f=e.target.files[0]; if(f){ $("qfPreview").src=URL.createObjectURL(f); $("qfPreview").style.display="block"; } };
 function editQuote(id){
   const q=(window._quotations||[]).find(x=>x.id===id); if(!q) return;
   resetQuoteForm(); $("qfTitle").textContent="Edit Quotation"; $("qfId").value=id;
+  $("qfName").value=q.title||""; $("qfCategory").value=q.categoryId||"";
   $("qfText").value=q.text||""; $("qfAuthor").value=q.author||"";
+  if(q.imageUrl){ $("qfPreview").src=q.imageUrl; $("qfPreview").style.display="block"; }
   $("quoteFormCard").style.display="block"; window.scrollTo({top:0,behavior:"smooth"});
 }
 $("qfSave").onclick=async()=>{
@@ -782,7 +792,11 @@ $("qfSave").onclick=async()=>{
   try{
     const id=$("qfId").value||null;
     const old=id?(window._quotations||[]).find(x=>x.id===id):null;
-    const data={text, author:$("qfAuthor").value.trim(), createdAt: old?.createdAt || serverTimestamp()};
+    let imageUrl=old?.imageUrl||"", imagePath=old?.imagePath||"";
+    const f=$("qfImage").files[0];
+    if(f){ if(old?.imagePath) await removeImage(old.imagePath);
+      const up=await uploadImage(f,"quotation-images"); imageUrl=up.url; imagePath=up.path; }
+    const data={text, title:$("qfName").value.trim(), categoryId:$("qfCategory").value||"", author:$("qfAuthor").value.trim(), imageUrl, imagePath, createdAt: old?.createdAt || serverTimestamp()};
     if(id) await updateDoc(doc(db,"quotations",id), data);
     else await addDoc(collection(db,"quotations"), data);
     $("quoteFormCard").style.display="none"; await refreshAll();
