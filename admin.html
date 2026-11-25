@@ -278,6 +278,17 @@ import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "fire
 /* ---------------- helpers ---------------- */
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+/* URL allowlist for links and frames: only https: and site-relative paths.
+   esc() stops markup injection but NOT javascript:/data: URLs — those would
+   run on click (or load in a frame), so anything else becomes "#". */
+function safeUrl(u){
+  const s = String(u || "").trim();
+  if(!s || s.startsWith("//")) return "#";
+  if(s.startsWith("https://")) return s;
+  if(s.startsWith("/")) return s;
+  if(/^[a-z][a-z0-9+.-]*:/i.test(s)) return "#";
+  return s; /* site-relative path, e.g. book.html?id=… or books/….pdf */
+}
 const fmt = n => "Rs " + Number(n || 0).toLocaleString("en-US");
 let db=null, auth=null, storage=null, app=null;
 let categories=[], products=[], siteDoc={};
@@ -814,12 +825,13 @@ function renderSubmissions(){
   w.innerHTML=subs.map(s=>{
     const status=s.status||"pending";
     const badge=status==="approved"?"Approved — published":status==="rejected"?"Rejected":"Under review";
+    const fl=safeUrl(s.fileUrl), cl=safeUrl(s.coverUrl); /* unsafe links are shown as plain text, never clickable */
     return `<div class="card" style="margin-bottom:14px">
       <h3>${esc(s.title||"")}</h3>
       <p class="muted">${esc(s.type||"")} · by <a href="author.html?author=${encodeURIComponent(s.author||"")}" target="_blank">${esc(s.author||"")}</a> · ${esc(s.categoryName||s.suggestedCategory||"")} ${s.suggestedCategory?`(suggested: ${esc(s.suggestedCategory)})`:""} · <b>${badge}</b></p>
       <p>${esc(s.description||"")}</p>
       ${s.body?`<p class="muted">${esc(String(s.body).slice(0,300))}</p>`:""}
-      <p class="muted">Submitter: ${esc(s.submitterName||"")} ${s.submitterEmail?`· ${esc(s.submitterEmail)}`:""} · File: ${s.fileUrl?`<a href="${esc(s.fileUrl)}" target="_blank">open link</a>`:"—"} · Cover: ${s.coverUrl?`<a href="${esc(s.coverUrl)}" target="_blank">open</a>`:"—"} · R2 key: ${esc(s.cloudflareKey||"—")}</p>
+      <p class="muted">Submitter: ${esc(s.submitterName||"")} ${s.submitterEmail?`· ${esc(s.submitterEmail)}`:""} · File: ${s.fileUrl?(fl!=="#"?`<a href="${fl}" target="_blank" rel="noopener">open link</a>`:`<span title="Blocked unsafe link">${esc(s.fileUrl)}</span>`):"—"} · Cover: ${s.coverUrl?(cl!=="#"?`<a href="${cl}" target="_blank" rel="noopener">open</a>`:`<span title="Blocked unsafe link">${esc(s.coverUrl)}</span>`):"—"} · R2 key: ${esc(s.cloudflareKey||"—")}</p>
       <p class="muted">ID: ${esc(s.id)}</p>
       <div class="field"><label>Final category (for approval)</label><select id="subCat-${s.id}"></select><small class="muted">Choose an existing category, or “Create suggested category” to create “${esc(s.suggestedCategory||"")}”.</small></div>
       <div class="field"><label>Final read/download link (R2 stream / file link, for books)</label><input id="subFile-${s.id}" value="${esc(s.fileUrl||"")}"></div>
