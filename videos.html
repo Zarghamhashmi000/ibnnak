@@ -166,6 +166,17 @@ import { getFirestore, collection, getDocs, query, orderBy } from "firebase/fire
 
 const grid = document.getElementById("videoGrid");
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+/* URL allowlist for links and frames: only https: and site-relative paths.
+   esc() stops markup injection but NOT javascript:/data: URLs — those would
+   run on click (or load in a frame), so anything else becomes "#". */
+function safeUrl(u){
+  const s = String(u || "").trim();
+  if(!s || s.startsWith("//")) return "#";
+  if(s.startsWith("https://")) return s;
+  if(s.startsWith("/")) return s;
+  if(/^[a-z][a-z0-9+.-]*:/i.test(s)) return "#";
+  return s; /* site-relative path, e.g. book.html?id=… or books/….pdf */
+}
 function state(title, text){
   grid.innerHTML = `<div class="state"><h3>${esc(title)}</h3><p>${esc(text)}</p></div>`;
 }
@@ -188,7 +199,7 @@ function ytId(url){
     grid.innerHTML = videos.map(v => {
       const id = ytId(v.youtubeUrl);
       return `
-      <a class="v-card" href="${esc(v.youtubeUrl || "#")}" target="_blank" rel="noopener">
+      <a class="v-card" href="${id ? "https://www.youtube.com/watch?v=" + id : "#"}" target="_blank" rel="noopener">
         <div class="v-thumb">
           ${id ? `<img src="https://i.ytimg.com/vi/${id}/hqdefault.jpg" alt="" loading="lazy" decoding="async">` : ""}
           <div class="play"><span>▶</span></div>
