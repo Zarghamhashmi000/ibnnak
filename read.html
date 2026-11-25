@@ -262,6 +262,18 @@ function renderPageViewer(p, pages){
     }catch(e){ /* no local copy — fall through to the R2 link / page photos */ }
     /* Books uploaded to Cloudflare R2: read the Worker's stream */
     if (p.readUrl){
+      /* Check the file is really there first — a missing file gets a clear
+         message instead of an empty reader. A failed check never blocks
+         reading: the reader is shown anyway. */
+      let fileOk = true;
+      try{
+        const chk = await fetch(p.readUrl, { headers:{ Range:"bytes=0-0" } });
+        fileOk = chk.ok;
+      }catch(_){ fileOk = true; }
+      if(!fileOk){
+        showState("Book file not available", "This book's file is missing from storage — please check back soon, or tell the admin.", id);
+        return;
+      }
       root.innerHTML = `
           <div class="viewer">
             <iframe id="bookFrame" src="${esc(p.readUrl)}" title="${esc(p.name)}" loading="lazy"></iframe>
