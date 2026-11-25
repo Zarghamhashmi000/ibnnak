@@ -222,9 +222,9 @@
         <input type="hidden" id="qfId">
         <div class="field"><label>Title <small class="muted">(optional)</small></label><input id="qfName" placeholder="e.g. On patience"></div>
         <div class="field"><label>Category <small class="muted">(optional)</small></label><select id="qfCategory"></select></div>
-        <div class="field"><label>Quotation text *</label><textarea id="qfText" style="min-height:110px" placeholder="The quotation itself…"></textarea></div>
+        <div class="field"><label>Quotation text <small class="muted">(optional)</small></label><textarea id="qfText" style="min-height:110px" placeholder="The quotation itself…"></textarea></div>
         <div class="field"><label>Author / source</label><input id="qfAuthor" placeholder="e.g. Rumi"></div>
-        <div class="field"><label>Image <small class="muted">(optional)</small></label><input id="qfImage" type="file" accept="image/*"><img class="preview-img" id="qfPreview" alt=""></div>
+        <div class="field"><label>Image *</label><input id="qfImage" type="file" accept="image/*"><img class="preview-img" id="qfPreview" alt=""></div>
         <div style="display:flex;gap:10px;margin-top:6px">
           <button class="btn btn-brand btn-sm" id="qfSave" style="width:auto">Save Quotation</button>
           <button class="btn btn-ghost btn-sm" id="qfCancel">Cancel</button>
@@ -758,7 +758,7 @@ function renderQuotations(){
   w.innerHTML=qs.map(q=>`
     <div class="list-item">
       ${q.imageUrl?`<img src="${esc(q.imageUrl)}" alt="">`:`<div class="ph">Quote</div>`}
-      <div class="info"><b style="font-weight:500;font-style:italic">\u201C${esc((q.text||"").slice(0,110))}${(q.text||"").length>110?"\u2026":""}\u201D</b><small>${q.title?esc(q.title)+" · ":""}${esc(q.author||"")}${q.categoryId&&catMap()[q.categoryId]?` · ${esc(catMap()[q.categoryId].name)}`:""}</small></div>
+      <div class="info"><b style="font-weight:500;font-style:italic">${q.text?`\u201C${esc(q.text.slice(0,110))}${q.text.length>110?"\u2026":""}\u201D`:esc(q.title||"Image quotation")}</b><small>${q.title&&q.text?esc(q.title)+" · ":""}${esc(q.author||"")}${q.categoryId&&catMap()[q.categoryId]?` · ${esc(catMap()[q.categoryId].name)}`:""}</small></div>
       <div class="actions">
         <button class="btn btn-ghost btn-sm" data-edit-q="${q.id}">Edit</button>
         <button class="btn btn-danger btn-sm" data-del-q="${q.id}">Delete</button>
@@ -787,11 +787,11 @@ function editQuote(id){
 }
 $("qfSave").onclick=async()=>{
   const text=$("qfText").value.trim();
-  if(!text){ alert("Quotation text is required."); return; }
+  const id=$("qfId").value||null;
+  const old=id?(window._quotations||[]).find(x=>x.id===id):null;
+  if(!$("qfImage").files[0] && !old?.imageUrl){ alert("Please upload an image for the quotation."); return; }
   const btn=$("qfSave"); btn.disabled=true; btn.textContent="Saving\u2026";
   try{
-    const id=$("qfId").value||null;
-    const old=id?(window._quotations||[]).find(x=>x.id===id):null;
     let imageUrl=old?.imageUrl||"", imagePath=old?.imagePath||"";
     const f=$("qfImage").files[0];
     if(f){ if(old?.imagePath) await removeImage(old.imagePath);
