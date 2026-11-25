@@ -116,7 +116,12 @@ $("wishOpen").onclick=()=>{$("wishDrawer").classList.add("open");$("overlay").cl
 let db=null, categories=[];
 const WORKER_URL="https://ibnnak-files.zarghamhaider722.workers.dev";
 function slugify(s){return String(s||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,80)||"book"}
-async function uploadPdfToR2Public(file,key){const res=await fetch(WORKER_URL+"/upload?key="+encodeURIComponent(key),{method:"POST",headers:{"Content-Type":file.type||"application/pdf"},body:file});const out=await res.json().catch(()=>({}));if(!res.ok)throw new Error((out&&out.error)||("Upload failed ("+res.status+")"));return out}
+const R2_MAX_PDF=100*1024*1024; /* must match the Worker's limit */
+function uploadOnceXHRPublic(file,key,onProgress){return new Promise((resolve,reject)=>{var xhr=new XMLHttpRequest();xhr.open("POST",WORKER_URL+"/upload?key="+encodeURIComponent(key));xhr.setRequestHeader("Content-Type",file.type||"application/pdf");xhr.upload.onprogress=function(e){if(e.lengthComputable&&onProgress)onProgress(Math.round(e.loaded*100/e.total))};xhr.onload=function(){var out={};try{out=JSON.parse(xhr.responseText||"{}")}catch(_){}if(xhr.status>=200&&xhr.status<300)resolve(out);else reject(new Error((out&&out.error)||("Upload failed ("+xhr.status+")")))};xhr.onerror=function(){reject(new Error("Network error — check your connection and try again."))};xhr.ontimeout=function(){reject(new Error("Upload timed out — try again."))};xhr.send(file)})}
+/* Public upload with a live progress %, one automatic retry on network/5xx
+   failure, and a client-side type/size check. A 200 reply means the file is
+   stored in R2 as a pending file — it only goes live if admin approves it. */
+async function uploadPdfToR2Public(file,key,onProgress){if(file.type&&file.type!=="application/pdf")throw new Error("The file must be a PDF.");if(file.size>R2_MAX_PDF)throw new Error("PDF is too large (max 100 MB).");if(!file.size)throw new Error("That file looks empty.");var lastErr=null;for(var a=1;a<=2;a++){try{return await uploadOnceXHRPublic(file,key,onProgress)}catch(e){lastErr=e;if(!/Network error|timed out|\(5\d\d\)/.test(e.message)||a===2)throw e;if(onProgress)onProgress(0)}}throw lastErr}
 async function loadCats(){try{if(typeof FIREBASE_CONFIGURED==="undefined"||!FIREBASE_CONFIGURED)throw new Error("not configured");const app=initializeApp(firebaseConfig);db=getFirestore(app,"default");const snap=await getDocs(query(collection(db,"categories"),orderBy("order")));categories=snap.docs.map(d=>({id:d.id,...d.data()}))}catch(e){console.warn(e.message)}var sel=$("fCategory");sel.innerHTML=categories.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("")+`<option value="__new__">Suggest a new category…</option>`;if(!categories.length)sel.innerHTML=`<option value="__new__">Suggest a new category…</option>`}
 $("fCategory").onchange=()=>{$("newCatField").style.display=$("fCategory").value==="__new__"?"block":"none"};
 $("fType").onchange=()=>{$("bodyField").style.display=["Article","Other","Quotation"].includes($("fType").value)?"block":"none"};
@@ -131,7 +136,7 @@ if(pdfFile){
   ok.textContent="Uploading your PDF…";ok.style.display="block";
   try{
     var key="pending/"+slugify(data.title)+"-"+Date.now()+".pdf";
-    await uploadPdfToR2Public(pdfFile,key);
+    await uploadPdfToR2Public(pdfFile,key,function(pct){ok.textContent="Uploading your PDF… "+pct+"%"});
     data.fileUrl=WORKER_URL+"/read/"+key;data.cloudflareKey=key;ok.style.display="none";
   }catch(upErr){ok.style.display="none";err.textContent="PDF upload failed: "+upErr.message+" — you can paste a file link instead and try again.";err.style.display="block";return}
 }
